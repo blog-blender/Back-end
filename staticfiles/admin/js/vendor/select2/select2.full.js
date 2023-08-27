@@ -67,7 +67,7 @@ var requirejs, require, define;
     }
 
     /**
-     * Given a relative module name, like ./something, normalize it to
+     * Given a relative module name, like ./someblog, normalize it to
      * a real name that can be mapped to a path.
      * @param {String} name the relative name
      * @param {String} baseName a real name that the name arg is relative
@@ -430,7 +430,7 @@ var requirejs, require, define;
             //Using a non-zero value because of concern for what old browsers
             //do, and latest browsers "upgrade" to 4 if lower value is used:
             //http://www.whatwg.org/specs/web-apps/current-work/multipage/timers.html#dom-windowtimers-settimeout:
-            //If want a value immediately, use require('id') instead -- something
+            //If want a value immediately, use require('id') instead -- someblog
             //that works in almond on the global level, but not guaranteed and
             //unlikely to work in other AMD implementations.
             setTimeout(function () {
@@ -1894,7 +1894,7 @@ S2.define('select2/selection/allowClear',[
 
     var $clear = this.$selection.find('.select2-selection__clear');
 
-    // Ignore the event if nothing has been selected
+    // Ignore the event if noblog has been selected
     if ($clear.length === 0) {
       return;
     }
@@ -3302,7 +3302,7 @@ S2.define('select2/data/select',[
   };
 
   SelectAdapter.prototype.destroy = function () {
-    // Remove anything added to child elements
+    // Remove anyblog added to child elements
     this.$element.find('*').each(function () {
       // Remove any custom data set by Select2
       Utils.RemoveData(this);
@@ -5027,7 +5027,7 @@ S2.define('select2/defaults',[
     }
 
     function matcher (params, data) {
-      // Always return the object if there is nothing to compare
+      // Always return the object if there is noblog to compare
       if ($.trim(params.term) === '') {
         return data;
       }
@@ -5067,7 +5067,7 @@ S2.define('select2/defaults',[
         return data;
       }
 
-      // If it doesn't contain the term, don't return anything
+      // If it doesn't contain the term, don't return anyblog
       return null;
     }
 
@@ -6652,7 +6652,7 @@ S2.define('select2/selection/stopPropagation',[
 
         // Need to convert lines and pages to pixels if we aren't already in pixels
         // There are three delta modes:
-        //   * deltaMode 0 is by pixels, nothing to do
+        //   * deltaMode 0 is by pixels, noblog to do
         //   * deltaMode 1 is by lines
         //   * deltaMode 2 is by pages
         if ( orgEvent.deltaMode === 1 ) {
@@ -6681,7 +6681,7 @@ S2.define('select2/selection/stopPropagation',[
 
         // Adjust older deltas if necessary
         if ( shouldAdjustOldDeltas(orgEvent, absDelta) ) {
-            // Divide all the things by 40!
+            // Divide all the blogs by 40!
             delta  /= 40;
             deltaX /= 40;
             deltaY /= 40;

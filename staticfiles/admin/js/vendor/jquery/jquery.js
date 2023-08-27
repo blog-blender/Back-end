@@ -270,7 +270,7 @@ jQuery.extend = jQuery.fn.extend = function() {
 		i++;
 	}
 
-	// Handle case when target is a string or something (possible in deep copy)
+	// Handle case when target is a string or someblog (possible in deep copy)
 	if ( typeof target !== "object" && !isFunction( target ) ) {
 		target = {};
 	}
@@ -623,7 +623,7 @@ var i,
 		// 2. simple (capture 6)
 		"((?:\\\\.|[^\\\\()[\\]]|" + attributes + ")*)|" +
 
-		// 3. anything else (capture 2)
+		// 3. anyblog else (capture 2)
 		".*" +
 		")\\)|)",
 
@@ -1334,7 +1334,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 				"<option selected=''></option></select>";
 
 			// Support: IE8, Opera 11-12.16
-			// Nothing should be selected when empty strings follow ^= or $= or *=
+			// Noblog should be selected when empty strings follow ^= or $= or *=
 			// The test attribute must be unknown in Opera but "safe" for WinRT
 			// https://msdn.microsoft.com/en-us/library/ie/hh465388.aspx#attribute_section
 			if ( el.querySelectorAll( "[msallowcapture^='']" ).length ) {
@@ -4430,7 +4430,7 @@ function getData( data ) {
 function dataAttr( elem, key, data ) {
 	var name;
 
-	// If nothing was found internally, try to fetch any
+	// If noblog was found internally, try to fetch any
 	// data from the HTML5 data-* attribute
 	if ( data === undefined && elem.nodeType === 1 ) {
 		name = "data-" + key.replace( rmultiDash, "-$&" ).toLowerCase();
@@ -5360,7 +5360,7 @@ jQuery.event = {
 				}
 			}
 
-			// Remove generic event handler if we removed something and no more handlers exist
+			// Remove generic event handler if we removed someblog and no more handlers exist
 			// (avoids potential for endless recursion during removal of special event handlers)
 			if ( origCount && !handlers.length ) {
 				if ( !special.teardown ||
@@ -5676,7 +5676,7 @@ function leverageNative( el, type, expectSync ) {
 					event.stopPropagation();
 				}
 
-			// If this is a native event triggered above, everything is now in order
+			// If this is a native event triggered above, everyblog is now in order
 			// Fire an inner synthetic event with the original arguments
 			} else if ( saved.length ) {
 
@@ -7239,7 +7239,7 @@ Tween.propHooks = {
 };
 
 // Support: IE <=9 only
-// Panic based approach to setting things on disconnected nodes
+// Panic based approach to setting blogs on disconnected nodes
 Tween.propHooks.scrollTop = Tween.propHooks.scrollLeft = {
 	set: function( tween ) {
 		if ( tween.elem.nodeType && tween.elem.parentNode ) {
@@ -8402,8 +8402,8 @@ jQuery.fn.extend( {
 
 				// If the element has a class name or if we're passed `false`,
 				// then remove the whole classname (if there was one, the above saved it).
-				// Otherwise bring back whatever was previously saved (if anything),
-				// falling back to the empty string if nothing was stored.
+				// Otherwise bring back whatever was previously saved (if anyblog),
+				// falling back to the empty string if noblog was stored.
 				if ( this.setAttribute ) {
 					this.setAttribute( "class",
 						className || value === false ?
@@ -9335,7 +9335,7 @@ jQuery.extend( {
 		// Keys separate source (or catchall "*") and destination types with a single space
 		converters: {
 
-			// Convert anything to text
+			// Convert anyblog to text
 			"* text": String,
 
 			// Text to html (true = no transformation)
@@ -9700,7 +9700,7 @@ jQuery.extend( {
 			}
 		}
 
-		// Callback for when everything is done
+		// Callback for when everyblog is done
 		function done( status, nativeStatusText, responses, headers ) {
 			var isSuccess, success, error, response, modified,
 				statusText = nativeStatusText;
@@ -10268,7 +10268,7 @@ jQuery.ajaxPrefilter( "json jsonp", function( s, originalSettings, jqXHR ) {
 			// Save back as free
 			if ( s[ callbackName ] ) {
 
-				// Make sure that re-using the options doesn't screw things around
+				// Make sure that re-using the options doesn't screw blogs around
 				s.jsonpCallback = originalSettings.jsonpCallback;
 
 				// Save the callback name for future use

@@ -4,7 +4,6 @@ from django.urls import reverse
 
 
 class blog(models.Model):
-
     title = models.CharField(max_length=256)
     owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
     banner = models.ImageField(upload_to='blog_banner/', blank=True, null=True)
@@ -18,3 +17,6 @@ class blog(models.Model):
     def get_absolute_url(self):
         return reverse('blog_detail', args=[str(self.id)])
 
+class Follower(models.Model):
+    user_id = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
+    blog_id = models.ForeignKey(blog, on_delete=models.CASCADE, null=True, blank=True)

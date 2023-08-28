@@ -1,6 +1,7 @@
 from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
+    ListAPIView
 )
 from .permissions import IsOwnerOrReadOnly
 from django.http import HttpResponse
@@ -12,30 +13,30 @@ from .models import Post, Photo,Comment,blog
 from .serializers import postSerializer, photoSerializer,commentSerializer
 from blogs.serializers import followerSerializer
 from blogs.models import Follower
+from rest_framework.decorators import api_view
 
 
-# class postList(ListCreateAPIView):
-#     queryset = Post.objects.all()
-#     serializer_class = postSerializer
-
-
-class postDetail(RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsOwnerOrReadOnly,)
+class postList(ListCreateAPIView):
     queryset = Post.objects.all()
     serializer_class = postSerializer
 
 
-class postList(ListCreateAPIView):
-
+class postDetail(RetrieveUpdateDestroyAPIView):
+    queryset = Post.objects.all()
     serializer_class = postSerializer
 
-    def get_queryset(self):
-        blog_id = self.request.query_params.get('blog_id')
-        if blog_id:
-            queryset = Post.objects.filter(blog_id=blog_id)
-        else:
-            queryset = Post.objects.all()
-        return queryset
+
+# class postList(APIView):
+
+#     serializer_class = postSerializer(Comment, many=True)
+
+#     def get_queryset(self):
+#         blog_id = self.request.query_params.get('blog_id')
+#         if blog_id:
+#             queryset = Post.objects.filter(blog_id=blog_id)
+#         else:
+#             queryset = Post.objects.all()
+#         return queryset
 
 
 
@@ -80,17 +81,35 @@ class commentListView(ListCreateAPIView):
         return queryset
 
 
-class HomeView(ListCreateAPIView):
 
-    serializer_class = postSerializer
-    def get_queryset(self):
-            user_id = self.request.query_params.get('user_id')
-            if user_id:
-                queryset = Follower.objects.filter(user_id=user_id)
-            else:
-                queryset = Follower.objects.all()
-            for blog in queryset:
-                id = blog.blog_id
-                posts = Post.objects.filter(blog_id=id)
-            print(posts)
-            return posts
+
+def get_queryset(request):
+        user_id = request.query_params.get('user_id')
+        if user_id:
+            queryset = Follower.objects.filter(user_id=user_id)
+        else:
+            queryset = Follower.objects.all()
+
+        for blog in queryset:
+            id = blog.blog_id
+            posts = Post.objects.filter(blog_id=id)
+        print(posts)
+        return posts
+
+
+@api_view(['GET'])
+def projects_and_news(request):
+    if request.method == 'GET':
+        posts = get_queryset(request)
+
+        data = []
+
+        for post in posts:
+            post_data = postSerializer(post, context={'request': request}).data
+            comments = Comment.objects.filter(post_id=post.id)
+            comment_data = commentSerializer(comments, many=True, context={'request': request}).data
+
+            post_data['comments'] = comment_data
+            data.append(post_data)
+
+        return Response(data)

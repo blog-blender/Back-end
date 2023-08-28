@@ -8,8 +8,11 @@ from django.views import View
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Post, Photo,Comment
+from .models import Post, Photo,Comment,blog
 from .serializers import postSerializer, photoSerializer,commentSerializer
+from blogs.serializers import followerSerializer
+from blogs.models import Follower
+
 
 # class postList(ListCreateAPIView):
 #     queryset = Post.objects.all()
@@ -75,3 +78,19 @@ class commentListView(ListCreateAPIView):
         else:
             queryset = Comment.objects.all()
         return queryset
+
+
+class HomeView(ListCreateAPIView):
+
+    serializer_class = postSerializer
+    def get_queryset(self):
+            user_id = self.request.query_params.get('user_id')
+            if user_id:
+                queryset = Follower.objects.filter(user_id=user_id)
+            else:
+                queryset = Follower.objects.all()
+            for blog in queryset:
+                id = blog.blog_id
+                posts = Post.objects.filter(blog_id=id)
+            print(posts)
+            return posts

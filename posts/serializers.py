@@ -12,7 +12,7 @@ class photoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photo
         fields = "__all__"
-        
+
 class commentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment

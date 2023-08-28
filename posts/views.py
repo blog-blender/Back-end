@@ -75,3 +75,4 @@ class commentListView(ListCreateAPIView):
         else:
             queryset = Comment.objects.all()
         return queryset
+

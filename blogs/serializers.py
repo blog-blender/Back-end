@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import blog,Follower
+from .models import blog,Follower,Categories,Category_associate
 
 
 class blogSerializer(serializers.ModelSerializer):
@@ -11,4 +11,17 @@ class blogSerializer(serializers.ModelSerializer):
 class followerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follower
+        fields = "__all__"
+
+
+class CategoriesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model =Categories
+        fields = "__all__"
+
+class Category_associateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model =Category_associate
         fields = "__all__"

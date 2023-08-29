@@ -89,11 +89,12 @@ def get_queryset(request):
             queryset = Follower.objects.filter(user_id=user_id)
         else:
             queryset = Follower.objects.all()
-
+        if not queryset:
+            return []
         for blog in queryset:
             id = blog.blog_id
             posts = Post.objects.filter(blog_id=id)
-        print(posts)
+
         return posts
 
 
@@ -103,6 +104,8 @@ def projects_and_news(request):
         posts = get_queryset(request)
 
         data = []
+        if  posts==[]:
+            return Response("This user doesn't follow any blogs")
 
         for post in posts:
             post_data = postSerializer(post, context={'request': request}).data

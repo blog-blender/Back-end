@@ -9,8 +9,8 @@ from django.views import View
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Post, Photo,Comment,blog
-from .serializers import postSerializer, photoSerializer,commentSerializer
+from .models import Post, Photo,Comment,blog,Like
+from .serializers import postSerializer, photoSerializer,commentSerializer,LikeSerializer
 from blogs.serializers import followerSerializer
 from blogs.models import Follower
 from rest_framework.decorators import api_view
@@ -21,9 +21,40 @@ class postList(ListCreateAPIView):
     serializer_class = postSerializer
 
 
-class postDetail(RetrieveUpdateDestroyAPIView):
-    queryset = Post.objects.all()
-    serializer_class = postSerializer
+# class postDetail(RetrieveUpdateDestroyAPIView):
+#     queryset = Post.objects.all()
+#     serializer_class = postSerializer
+
+@api_view(['GET'])
+def postDetail(request):
+    if request.method == 'GET':
+        post_id = request.query_params.get('post_id')
+        post = Post.objects.filter(id=post_id)
+        post_data = postSerializer(post[0], context={'request': request}).data
+        comments = Comment.objects.filter( post_id= post_id)
+        if comments:
+            comment_list = []
+            for c in comments:
+                comment_data = commentSerializer(c, context={'request': request}).data
+                comment_list.append(comment_data)
+            post_data['comments'] = comment_list
+        photo = Photo.objects.filter(post_id=post_id)
+        if photo:
+            photos_list = []
+            for p in photo:
+                photo_data=photoSerializer(p, context={'request': request}).data
+                photos_list.append(photo_data)
+            post_data['photo'] = photos_list
+        likes = Like.objects.filter(post_id=post_id)
+        if likes:
+            likes_list = []
+            for l in likes :
+                like_data=LikeSerializer(l, context={'request': request}).data
+                likes_list.append(like_data)
+            post_data['likes'] = len(likes_list)
+
+
+        return Response(post_data)
 
 
 # class postList(APIView):
@@ -85,6 +116,7 @@ class commentListView(ListCreateAPIView):
 
 def get_queryset(request):
         user_id = request.query_params.get('user_id')
+        num_of_posts = request.query_params.get('num_of_posts')
         if user_id:
             queryset = Follower.objects.filter(user_id=user_id)
         else:
@@ -95,7 +127,7 @@ def get_queryset(request):
             id = blog.blog_id
             posts = Post.objects.filter(blog_id=id)
 
-        return posts
+        return posts[:10]
 
 
 @api_view(['GET'])
@@ -114,5 +146,6 @@ def projects_and_news(request):
 
             post_data['comments'] = comment_data
             data.append(post_data)
+
 
         return Response(data)

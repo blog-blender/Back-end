@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Post,Photo,Comment
+from .models import Post,Photo,Comment,Like
 
 
 class postSerializer(serializers.ModelSerializer):
@@ -26,9 +26,11 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ('user_id', 'post_id', 'content')
 
-class CombinedSerializer(serializers.Serializer):
-    model_a_data = postSerializer(source='*', read_only=True)
-    model_b_data = commentSerializer(source='*', read_only=True)
+
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = "__all__"
 
 
 

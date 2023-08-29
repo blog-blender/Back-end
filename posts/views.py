@@ -10,7 +10,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Post, Photo,Comment,blog
-from .serializers import postSerializer, photoSerializer,commentSerializer,CommentSerializer
+from .serializers import postSerializer, photoSerializer,commentSerializer,CommentSerializer,PostUpdateSerializer
+
 from blogs.serializers import followerSerializer
 from blogs.models import Follower
 from rest_framework.decorators import api_view
@@ -119,7 +120,12 @@ def projects_and_news(request):
 
 
 
-class CommentUpdateView(generics.UpdateAPIView):
+class CommentUpdateView(RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     lookup_url_kwarg = 'comment_id'
+class PostUpdateView(RetrieveUpdateDestroyAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostUpdateSerializer
+    lookup_url_kwarg = 'post_id'
+

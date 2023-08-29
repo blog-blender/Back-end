@@ -6,7 +6,7 @@ from rest_framework.generics import (
 )
 from .models import blog,Follower,Categories,Category_associate
 from .permissions import IsOwnerOrReadOnly
-from .serializers import blogSerializer,followerSerializer,CategoriesSerializer
+from .serializers import blogSerializer,followerSerializer,CategoriesSerializer,BlogUpdateSerializer
 from rest_framework.views import APIView
 
 
@@ -49,3 +49,8 @@ class BlogFollowersView(ListAPIView):
             return queryset
 
 
+##update and delete blog
+class BlogUpdateView(RetrieveUpdateDestroyAPIView):
+    queryset = blog.objects.all()
+    serializer_class = BlogUpdateSerializer
+    lookup_url_kwarg = 'blog_id'

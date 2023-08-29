@@ -15,16 +15,6 @@ from blogs.serializers import followerSerializer
 from blogs.models import Follower
 from rest_framework.decorators import api_view
 
-
-class postList(ListCreateAPIView):
-    queryset = Post.objects.all()
-    serializer_class = postSerializer
-
-
-# class postDetail(RetrieveUpdateDestroyAPIView):
-#     queryset = Post.objects.all()
-#     serializer_class = postSerializer
-
 @api_view(['GET'])
 def postDetail(request):
     if request.method == 'GET':
@@ -57,17 +47,17 @@ def postDetail(request):
         return Response(post_data)
 
 
-# class postList(APIView):
+class postList(ListCreateAPIView):
 
-#     serializer_class = postSerializer(Comment, many=True)
+    serializer_class = postSerializer
 
-#     def get_queryset(self):
-#         blog_id = self.request.query_params.get('blog_id')
-#         if blog_id:
-#             queryset = Post.objects.filter(blog_id=blog_id)
-#         else:
-#             queryset = Post.objects.all()
-#         return queryset
+    def get_queryset(self):
+        blog_id = self.request.query_params.get('blog_id')
+        if blog_id:
+            queryset = Post.objects.filter(blog_id=blog_id)
+        else:
+            queryset = Post.objects.all()
+        return queryset
 
 
 
@@ -126,12 +116,13 @@ def get_queryset(request):
         for blog in queryset:
             id = blog.blog_id
             posts = Post.objects.filter(blog_id=id)
-
-        return posts[:10]
+        if num_of_posts:
+            return posts[:int(num_of_posts)]
+        return posts
 
 
 @api_view(['GET'])
-def projects_and_news(request):
+def homeView(request):
     if request.method == 'GET':
         posts = get_queryset(request)
 

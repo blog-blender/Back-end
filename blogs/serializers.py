@@ -19,9 +19,11 @@ class CategoriesSerializer(serializers.ModelSerializer):
     class Meta:
         model =Categories
         fields = "__all__"
+        depth =1
 
 class Category_associateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model =Category_associate
         fields = "__all__"
+        depth =1

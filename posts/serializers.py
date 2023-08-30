@@ -5,8 +5,8 @@ from .models import Post,Photo,Comment,Like
 class postSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'blog_id']
-        # fields = "__all__" i removed this
+        # fields = ['id', 'title', 'content', 'blog_id']
+        fields = "__all__"
         # depth = 1
 
 

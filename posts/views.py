@@ -15,6 +15,7 @@ from blogs.serializers import followerSerializer
 from blogs.serializers import blogSerializer
 from blogs.models import Follower
 from rest_framework.decorators import api_view
+from rest_framework.parsers import MultiPartParser, FormParser
 
 @api_view(['GET'])
 def postDetail(request):
@@ -88,6 +89,33 @@ class PostCreateView(APIView):
             },
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+
+
+
+
+class CreatePost(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+    def post(self, request, *args, **kwargs):
+        serializer = postSerializer(data=request.data)
+        photos = request.data.get('photos', [])
+
+        if serializer.is_valid():
+            post_instance = serializer.save()
+            created_post_id = post_instance.id
+
+            photo_data_list = [{'post_id': created_post_id, 'data': photo} for photo in photos]
+            photo_serializer = photoSerializer(data=photo_data_list, many=True)
+            if photo_serializer.is_valid():
+                photo_serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
 
 

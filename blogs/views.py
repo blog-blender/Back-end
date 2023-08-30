@@ -17,6 +17,7 @@ from rest_framework import status
 import json
 from rest_framework.views import APIView
 from django.http import JsonResponse
+from rest_framework.parsers import MultiPartParser, FormParser
 
 class blogList(ListCreateAPIView):
     queryset = blog.objects.all()
@@ -196,7 +197,9 @@ def searchView(request):
 
 
 class CreateBlog(APIView):
+    parser_classes = (MultiPartParser, FormParser)
     def post(self, request, *args, **kwargs):
+
         serializer = blogSerializer(data=request.data)
         category = request.data['category']
 

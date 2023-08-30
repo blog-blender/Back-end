@@ -12,7 +12,7 @@ class followerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follower
         fields = "__all__"
-
+        depth=1
 
 class CategoriesSerializer(serializers.ModelSerializer):
 
@@ -36,3 +36,9 @@ class BlogUpdateSerializer(serializers.ModelSerializer):
                 setattr(instance, attr, value)
         instance.save()
         return instance
+
+class FollowCreateSerializer(serializers.Serializer):
+    blog_id = serializers.IntegerField()
+    
+class UnfollowSerializer(serializers.Serializer):
+    blog_id = serializers.IntegerField()

@@ -29,3 +29,6 @@ class Categories(models.Model):
 class Category_associate(models.Model):
     category_name = models.ForeignKey(Categories,max_length=100 , on_delete=models.CASCADE)
     blog_id = models.ForeignKey(blog,max_length=100 , on_delete=models.CASCADE)
+
+
+

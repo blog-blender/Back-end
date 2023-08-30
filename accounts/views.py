@@ -9,7 +9,7 @@
 #     template_name = "registration/signup.html"
 from rest_framework.generics import (
     ListCreateAPIView,
-    RetrieveUpdateDestroyAPIView,ListAPIView
+    RetrieveUpdateDestroyAPIView,ListAPIView,RetrieveUpdateAPIView
 )
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -39,3 +39,11 @@ class usersListView(ListAPIView):
             queryset = CustomUser.objects.all()
         return queryset
 
+
+class UserUpdateView(RetrieveUpdateDestroyAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = userSerializer
+    # permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user

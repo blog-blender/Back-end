@@ -9,35 +9,67 @@ from django.views import View
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+<<<<<<< HEAD
 from .models import Post, Photo,Comment,blog
 from .serializers import postSerializer, photoSerializer,commentSerializer,CommentSerializer,PostUpdateSerializer
 
+=======
+from .models import Post, Photo,Comment,blog,Like
+from .serializers import postSerializer, photoSerializer,commentSerializer,LikeSerializer
+>>>>>>> main
 from blogs.serializers import followerSerializer
+from blogs.serializers import blogSerializer
 from blogs.models import Follower
 from rest_framework.decorators import api_view
+<<<<<<< HEAD
 from rest_framework import generics
+=======
+from rest_framework.parsers import MultiPartParser, FormParser
+
+@api_view(['GET'])
+def postDetail(request):
+    if request.method == 'GET':
+        post_id = request.query_params.get('post_id')
+        post = Post.objects.filter(id=post_id)
+        post_data = postSerializer(post[0], context={'request': request}).data
+        comments = Comment.objects.filter( post_id= post_id)
+        if comments:
+            comment_list = []
+            for c in comments:
+                comment_data = commentSerializer(c, context={'request': request}).data
+                comment_list.append(comment_data)
+            post_data['comments'] = comment_list
+        photo = Photo.objects.filter(post_id=post_id)
+        if photo:
+            photos_list = []
+            for p in photo:
+                photo_data=photoSerializer(p, context={'request': request}).data
+                photos_list.append(photo_data)
+            post_data['photo'] = photos_list
+        likes = Like.objects.filter(post_id=post_id)
+        if likes:
+            likes_list = []
+            for l in likes :
+                like_data=LikeSerializer(l, context={'request': request}).data
+                likes_list.append(like_data)
+            post_data['likes'] = len(likes_list)
+
+
+        return Response(post_data)
+
+>>>>>>> main
 
 class postList(ListCreateAPIView):
-    queryset = Post.objects.all()
+
     serializer_class = postSerializer
 
-
-class postDetail(RetrieveUpdateDestroyAPIView):
-    queryset = Post.objects.all()
-    serializer_class = postSerializer
-
-
-# class postList(APIView):
-
-#     serializer_class = postSerializer(Comment, many=True)
-
-#     def get_queryset(self):
-#         blog_id = self.request.query_params.get('blog_id')
-#         if blog_id:
-#             queryset = Post.objects.filter(blog_id=blog_id)
-#         else:
-#             queryset = Post.objects.all()
-#         return queryset
+    def get_queryset(self):
+        blog_id = self.request.query_params.get('blog_id')
+        if blog_id:
+            queryset = Post.objects.filter(blog_id=blog_id)
+        else:
+            queryset = Post.objects.all()
+        return queryset
 
 
 
@@ -51,8 +83,8 @@ class PostCreateView(APIView):
         photo_serializer = photoSerializer(data=photo_data)
 
         if post_serializer.is_valid() and photo_serializer.is_valid():
-            post_instance = post_serializer.save()
-            photo_instance = photo_serializer.save()
+            post_serializer.save()
+            photo_serializer.save()
             return Response(
                 {
                     'post': post_serializer.data,
@@ -67,6 +99,60 @@ class PostCreateView(APIView):
             },
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+
+
+
+
+class CreatePost(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+    def post(self, request, *args, **kwargs):
+        serializer = postSerializer(data=request.data)
+        photos = request.data.get('photos', [])
+
+        if serializer.is_valid():
+            post_instance = serializer.save()
+            created_post_id = post_instance.id
+
+            photo_data_list = [{'post_id': created_post_id, 'data': photo} for photo in photos]
+            photo_serializer = photoSerializer(data=photo_data_list, many=True)
+            if photo_serializer.is_valid():
+                photo_serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+
+
+
+
+
+class RecentPosts(ListCreateAPIView):
+    serializer_class = postSerializer
+
+    def get_queryset(self):
+        user_id = self.request.query_params.get('user_id')
+        queryset = Post.objects.filter(Auther_id_id=user_id)
+        return queryset
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class commentListView(ListCreateAPIView):
@@ -86,6 +172,7 @@ class commentListView(ListCreateAPIView):
 
 def get_queryset(request):
         user_id = request.query_params.get('user_id')
+        num_of_posts = request.query_params.get('num_of_posts')
         if user_id:
             queryset = Follower.objects.filter(user_id=user_id)
         else:
@@ -95,12 +182,13 @@ def get_queryset(request):
         for blog in queryset:
             id = blog.blog_id
             posts = Post.objects.filter(blog_id=id)
-
+        if num_of_posts:
+            return posts[:int(num_of_posts)]
         return posts
 
 
 @api_view(['GET'])
-def projects_and_news(request):
+def homeView(request):
     if request.method == 'GET':
         posts = get_queryset(request)
 
@@ -116,10 +204,12 @@ def projects_and_news(request):
             post_data['comments'] = comment_data
             data.append(post_data)
 
+
         return Response(data)
 
 
 
+<<<<<<< HEAD
 class CommentUpdateView(RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
@@ -129,3 +219,19 @@ class PostUpdateView(RetrieveUpdateDestroyAPIView):
     serializer_class = PostUpdateSerializer
     lookup_url_kwarg = 'post_id'
 
+=======
+
+
+
+# {
+#   "post_data": {
+#     "title": "Sample Post Title",
+#     "Auther_id": 1,  // Replace with a valid user ID
+#     "content": "This is the content of the sample post.",
+#     "blog_id": 1     // Replace with a valid blog ID
+#   },
+#   "photo_data": {
+#     "data": "base64_encoded_image_data_here"
+#   }
+# }
+>>>>>>> main

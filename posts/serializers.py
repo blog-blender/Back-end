@@ -1,10 +1,11 @@
 from rest_framework import serializers
-from .models import Post,Photo,Comment
+from .models import Post,Photo,Comment,Like
 
 
 class postSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
+        # fields = ['id', 'title', 'content', 'blog_id']
         fields = "__all__"
         # depth = 1
 
@@ -26,9 +27,14 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ('user_id', 'id', 'content','post_id')
 
-class CombinedSerializer(serializers.Serializer):
-    model_a_data = postSerializer(source='*', read_only=True)
-    model_b_data = commentSerializer(source='*', read_only=True)
+
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = "__all__"
+
+
+
 
 class PostUpdateSerializer(serializers.ModelSerializer):
     class Meta:

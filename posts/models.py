@@ -10,6 +10,11 @@ class Post(models.Model):
     blog_id = models.ForeignKey(blog, on_delete=models.CASCADE, null=True, blank=True)
 
 
+
+
+    
+
+
     def __str__(self):
         return self.title
 

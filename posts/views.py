@@ -12,6 +12,7 @@ from rest_framework import status
 from .models import Post, Photo,Comment,blog,Like
 from .serializers import postSerializer, photoSerializer,commentSerializer,LikeSerializer
 from blogs.serializers import followerSerializer
+from blogs.serializers import blogSerializer
 from blogs.models import Follower
 from rest_framework.decorators import api_view
 
@@ -71,8 +72,8 @@ class PostCreateView(APIView):
         photo_serializer = photoSerializer(data=photo_data)
 
         if post_serializer.is_valid() and photo_serializer.is_valid():
-            post_instance = post_serializer.save()
-            photo_instance = photo_serializer.save()
+            post_serializer.save()
+            photo_serializer.save()
             return Response(
                 {
                     'post': post_serializer.data,
@@ -87,6 +88,33 @@ class PostCreateView(APIView):
             },
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+
+
+
+
+
+
+class RecentPosts(ListCreateAPIView):
+    serializer_class = postSerializer
+
+    def get_queryset(self):
+        user_id = self.request.query_params.get('user_id')
+        queryset = Post.objects.filter(Auther_id_id=user_id)
+        return queryset
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class commentListView(ListCreateAPIView):
@@ -141,3 +169,19 @@ def homeView(request):
 
         return Response(data)
 
+
+
+
+
+
+# {
+#   "post_data": {
+#     "title": "Sample Post Title",
+#     "Auther_id": 1,  // Replace with a valid user ID
+#     "content": "This is the content of the sample post.",
+#     "blog_id": 1     // Replace with a valid blog ID
+#   },
+#   "photo_data": {
+#     "data": "base64_encoded_image_data_here"
+#   }
+# }

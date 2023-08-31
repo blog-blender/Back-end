@@ -9,12 +9,6 @@ class Post(models.Model):
     content = models.TextField(default="", null=True, blank=True)
     blog_id = models.ForeignKey(blog, on_delete=models.CASCADE, null=True, blank=True)
 
-
-
-
-    
-
-
     def __str__(self):
         return self.title
 
@@ -24,7 +18,6 @@ class Post(models.Model):
 class Like(models.Model):
     user_id = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
     post_id = models.ForeignKey(Post, on_delete=models.CASCADE, null=True, blank=True)
-
 
 class Comment(models.Model):
     user_id = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)

@@ -7,7 +7,7 @@ class blogSerializer(serializers.ModelSerializer):
     class Meta:
         model = blog
         fields = "__all__"
-        read_only_fields = ('title',)
+        # read_only_fields = ('title')
 
 class followerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,6 +27,7 @@ class Category_associateSerializer(serializers.ModelSerializer):
     class Meta:
         model =Category_associate
         fields = "__all__"
+        depth = 1
 
 
 # class BlogSerializer(serializers.ModelSerializer):

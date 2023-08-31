@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Post, Photo,Comment
-from .serializers import postSerializer, photoSerializer,commentSerializer,CommentSerializer,PostUpdateSerializer
+from .serializers import postSerializer, photoSerializer,commentSerializer,CommentSerializer,PostUpdateSerializer,postDetail_CommentSerializer,postDetail_LikeSerializer
 from .models import Post, Photo,Comment,Like
 from .serializers import postSerializer, photoSerializer,commentSerializer,LikeSerializer
 from blogs.models import Follower
@@ -24,9 +24,11 @@ def postDetail(request):
         if comments:
             comment_list = []
             for c in comments:
-                comment_data = commentSerializer(c, context={'request': request}).data
+                comment_data = postDetail_CommentSerializer(c, context={'request': request}).data
                 comment_list.append(comment_data)
             post_data['comments'] = comment_list
+        else:
+            post_data['comments'] = []
         photo = Photo.objects.filter(post_id=post_id)
         if photo:
             photos_list = []
@@ -34,13 +36,17 @@ def postDetail(request):
                 photo_data=photoSerializer(p, context={'request': request}).data
                 photos_list.append(photo_data)
             post_data['photo'] = photos_list
+        else:
+            post_data['photo'] = []
         likes = Like.objects.filter(post_id=post_id)
         if likes:
             likes_list = []
             for l in likes :
-                like_data=LikeSerializer(l, context={'request': request}).data
+                like_data=postDetail_LikeSerializer(l, context={'request': request}).data
                 likes_list.append(like_data)
-            post_data['likes'] = len(likes_list)
+            post_data['likes'] = likes_list
+        else:
+            post_data['likes'] = []
         return Response(post_data)
 
 class postList(ListCreateAPIView):

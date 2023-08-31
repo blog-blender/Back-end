@@ -5,7 +5,5 @@ from django.db import models
 class CustomUser(AbstractUser):
     profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
 
-    # add additional fields in here
-
     def __str__(self):
         return self.username

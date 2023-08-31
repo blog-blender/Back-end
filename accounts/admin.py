@@ -4,6 +4,7 @@ from django.contrib.auth.admin import UserAdmin
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 from .models import CustomUser
 
+
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
@@ -14,7 +15,6 @@ class CustomUserAdmin(UserAdmin):
         "profile_pic"
     ]
 
-    # Add the 'profile_pic' field to the user editing form
     fieldsets = (
         (None, {'fields': ('username', 'email', 'password')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'profile_pic')}),

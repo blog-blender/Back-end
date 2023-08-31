@@ -9,7 +9,6 @@ class blog(models.Model):
     banner = models.ImageField(upload_to='blog_banner/', blank=True, null=True)
     blog_pic = models.ImageField(upload_to='blog_pic/', blank=True, null=True)
     description = models.TextField(default="", null=True, blank=True)
-    # categories = models.JSONField(default=list, null=True)
 
     def __str__(self):
         return self.title

@@ -24,7 +24,7 @@ class blogUpdateView(LoginRequiredMixin, UpdateView):
 class blogCreateView(LoginRequiredMixin, CreateView):
     template_name = "blogs/blog_create.html"
     model = blog
-    fields = ["name", "rating", "reviewer"] # "__all__" for all of them
+    fields = ["name", "rating", "reviewer"]
 
 
 class blogDeleteView(LoginRequiredMixin, DeleteView):

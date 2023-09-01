@@ -14,74 +14,40 @@ from blogs.models import Follower
 from rest_framework.decorators import api_view
 from rest_framework.parsers import MultiPartParser, FormParser
 
+################################### GET methods ######################################
+
 @api_view(['GET'])
 def postDetail(request):
     if request.method == 'GET':
         post_id = request.query_params.get('post_id')
         post = Post.objects.filter(id=post_id)
-        post_data = postSerializer(post[0], context={'request': request}).data
-        comments = Comment.objects.filter( post_id= post_id)
-        if comments:
-            comment_list = []
-            for c in comments:
-                comment_data = postDetail_CommentSerializer(c, context={'request': request}).data
-                comment_list.append(comment_data)
-            post_data['comments'] = comment_list
-        else:
-            post_data['comments'] = []
-        photo = Photo.objects.filter(post_id=post_id)
-        if photo:
-            photos_list = []
-            for p in photo:
-                photo_data=photoSerializer(p, context={'request': request}).data
-                photos_list.append(photo_data)
-            post_data['photo'] = photos_list
-        else:
-            post_data['photo'] = []
-        likes = Like.objects.filter(post_id=post_id)
-        if likes:
-            likes_list = []
-            for l in likes :
-                like_data=postDetail_LikeSerializer(l, context={'request': request}).data
-                likes_list.append(like_data)
-            post_data['likes'] = likes_list
-        else:
-            post_data['likes'] = []
-        return Response(post_data)
+        return post_getter(request, post)
 
-class postList(ListCreateAPIView):
-    serializer_class = postSerializer
-    def get_queryset(self):
-        blog_id = self.request.query_params.get('blog_id')
+@api_view(['GET'])
+def postList (request):
+    if request.method == 'GET':
+        blog_id = request.query_params.get('blog_id')
         if blog_id:
-            queryset = Post.objects.filter(blog_id=blog_id)
+            post = Post.objects.filter(blog_id=blog_id)
         else:
-            queryset = Post.objects.all()
-        return queryset
+            post = Post.objects.all()
+        return post_getter(request, post)
 
-class PostCreateView(APIView):
-    def post(self, request, format=None):
-        post_data = request.data.get('post_data')
-        photo_data = request.data.get('photo_data')
-        post_serializer = postSerializer(data=post_data)
-        photo_serializer = photoSerializer(data=photo_data)
-        if post_serializer.is_valid() and photo_serializer.is_valid():
-            post_serializer.save()
-            photo_serializer.save()
-            return Response(
-                {
-                    'post': post_serializer.data,
-                    'photo': photo_serializer.data
-                },
-                status=status.HTTP_201_CREATED
-            )
-        return Response(
-            {
-                'post_errors': post_serializer.errors if post_data else None,
-                'photo_errors': photo_serializer.errors if photo_data else None
-            },
-            status=status.HTTP_400_BAD_REQUEST
-        )
+@api_view(['GET'])
+def RecentPosts (request):
+    if request.method == 'GET':
+        user_id = request.query_params.get('user_id')
+        post = Post.objects.filter(Auther_id=user_id)
+        return post_getter(request, post)
+
+@api_view(['GET'])
+def homeView (request):
+    if request.method == 'GET':
+        post = get_queryset(request)
+        return post_getter(request, post)
+
+
+################################### PUT methods ######################################
 
 class CreatePost(APIView):
     parser_classes = (MultiPartParser, FormParser)
@@ -98,12 +64,8 @@ class CreatePost(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class RecentPosts(ListCreateAPIView):
-    serializer_class = postSerializer
-    def get_queryset(self):
-        user_id = self.request.query_params.get('user_id')
-        queryset = Post.objects.filter(Auther_id_id=user_id)
-        return queryset
+
+
 
 class commentListView(ListCreateAPIView):
     serializer_class = commentSerializer
@@ -115,36 +77,8 @@ class commentListView(ListCreateAPIView):
             queryset = Comment.objects.all()
         return queryset
 
-def get_queryset(request):
-        user_id = request.query_params.get('user_id')
-        num_of_posts = request.query_params.get('num_of_posts')
-        if user_id:
-            queryset = Follower.objects.filter(user_id=user_id)
-        else:
-            queryset = Follower.objects.all()
-        if not queryset:
-            return []
-        for blog in queryset:
-            id = blog.blog_id
-            posts = Post.objects.filter(blog_id=id)
-        if num_of_posts:
-            return posts[:int(num_of_posts)]
-        return posts
 
-@api_view(['GET'])
-def homeView(request):
-    if request.method == 'GET':
-        posts = get_queryset(request)
-        data = []
-        if  posts==[]:
-            return Response("This user doesn't follow any blogs")
-        for post in posts:
-            post_data = postSerializer(post, context={'request': request}).data
-            comments = Comment.objects.filter(post_id=post.id)
-            comment_data = commentSerializer(comments, many=True, context={'request': request}).data
-            post_data['comments'] = comment_data
-            data.append(post_data)
-        return Response(data)
+
 
 class CommentUpdateView(RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
@@ -171,4 +105,78 @@ class PostUpdateView(RetrieveUpdateDestroyAPIView):
 #   }
 # }
 
+################################################## services ############################################
+def post_getter(request, post):
+    post_list = []
+    for p in post:
+        post_data = postSerializer(p, context={'request': request}).data
+        comments = Comment.objects.filter( post_id= p.id)
+        if comments:
+            comment_list = []
+            for c in comments:
+                comment_data = postDetail_CommentSerializer(c, context={'request': request}).data
+                comment_list.append(comment_data)
+            post_data['comments'] = comment_list
+        else:
+            post_data['comments'] = []
+        photo = Photo.objects.filter(post_id=p.id)
+        if photo:
+            photos_list = []
+            for p in photo:
+                photo_data=photoSerializer(p, context={'request': request}).data
+                photos_list.append(photo_data)
+            post_data['photo'] = photos_list
+        else:
+            post_data['photo'] = []
+        likes = Like.objects.filter(post_id=p.id)
+        if likes:
+            likes_list = []
+            for l in likes :
+                like_data=postDetail_LikeSerializer(l, context={'request': request}).data
+                likes_list.append(like_data)
+            post_data['likes'] = likes_list
+        else:
+            post_data['likes'] = []
+        post_list.append(post_data)
+    return Response(post_list)
+
+def get_queryset(request):
+        user_id = request.query_params.get('user_id')
+        num_of_posts = request.query_params.get('num_of_posts')
+        if user_id:
+            queryset = Follower.objects.filter(user_id=user_id)
+        else:
+            queryset = Follower.objects.all()
+        if not queryset:
+            return []
+        for blog in queryset:
+            id = blog.blog_id
+            posts = Post.objects.filter(blog_id=id)
+        if num_of_posts:
+            return posts[:int(num_of_posts)]
+        return posts
+
+# class PostCreateView(APIView):
+#     def post(self, request, format=None):
+#         post_data = request.data.get('post_data')
+#         photo_data = request.data.get('photo_data')
+#         post_serializer = postSerializer(data=post_data)
+#         photo_serializer = photoSerializer(data=photo_data)
+#         if post_serializer.is_valid() and photo_serializer.is_valid():
+#             post_serializer.save()
+#             photo_serializer.save()
+#             return Response(
+#                 {
+#                     'post': post_serializer.data,
+#                     'photo': photo_serializer.data
+#                 },
+#                 status=status.HTTP_201_CREATED
+#             )
+#         return Response(
+#             {
+#                 'post_errors': post_serializer.errors if post_data else None,
+#                 'photo_errors': photo_serializer.errors if photo_data else None
+#             },
+#             status=status.HTTP_400_BAD_REQUEST
+#         )
 

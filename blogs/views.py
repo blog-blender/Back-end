@@ -19,21 +19,18 @@ from django.http import JsonResponse
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
 
-class blogList(ListCreateAPIView):
-    queryset = blog.objects.all()
-    serializer_class = blogSerializer
-    def get_queryset(self):
-        owner = self.request.query_params.get('owner')
+@api_view(['GET'])
+def blogList(request):
+    if request.method == 'GET':
+        owner = request.query_params.get('owner')
+        blog_id = request.query_params.get('blog_id')
         if owner:
-            queryset = blog.objects.filter(owner=owner)
+            blogs = blog.objects.filter(owner=owner)
+        elif blog_id:
+            blogs = blog.objects.filter(id=blog_id)
         else:
-            queryset = blog.objects.all()
-        return queryset
-
-class blogDetail(RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsOwnerOrReadOnly,)
-    queryset = blog.objects.all()
-    serializer_class = blogSerializer
+            blogs = blog.objects.all()
+    return blog_getter(request, blogs)
 
 class followerList(ListCreateAPIView):
     # permission_classes = (IsOwnerOrReadOnly,)
@@ -65,6 +62,7 @@ def searchView(request):
             for b in blogs:
                 blogs_data = Category_associateSerializer(b, context={'request': request}).data
                 blogs_lsit.append(blogs_data)
+        blogs = blog.objects.all()
         def matching(blogs_list, blog_title):
             best_ratio = 0.65
             best_response = []
@@ -97,7 +95,6 @@ def searchView(request):
                 blogs_data = Category_associateSerializer(b, context={'request': request}).data
                 blogs_lsit.append(blogs_data)
             return Response(blogs_lsit)
-        blogs = blog.objects.all()
         blogs_lsit=[]
         for b in blogs:
             blogs_data = blogSerializer(b, context={'request': request}).data
@@ -156,3 +153,21 @@ class UnfollowBlog(DestroyAPIView):
             return Response({'detail': 'You are not following this blog.'}, status=status.HTTP_400_BAD_REQUEST)
         follower.delete()
         return Response({'detail': 'You have unfollowed this blog.'}, status=status.HTTP_204_NO_CONTENT)
+
+
+########################## sevices ###########################
+def blog_getter(request, blogs):
+    blog_list = []
+    for b in blogs:
+        blog_data = blogSerializer(b, context={'request': request}).data
+        Category_associates = Category_associate.objects.filter( blog_id= b.id)
+        if Category_associates:
+            Category_associateslist = []
+            for a in Category_associates:
+                Category_associates_data = Category_associateSerializer(a, context={'request': request}).data
+                Category_associateslist.append(Category_associates_data)
+                blog_data['Category_associates'] = Category_associateslist
+        else:
+            blog_data['Category_associates'] = []
+        blog_list.append(blog_data)
+    return Response(blog_list)

@@ -35,8 +35,12 @@ def postList (request):
 def RecentPosts (request):
     if request.method == 'GET':
         user_id = request.query_params.get('user_id')
+        num_of_posts = request.query_params.get('num_of_posts')
         post = Post.objects.filter(Auther_id=user_id)
+        post = post[::-1]
+        post = post[:int(num_of_posts)]
         return post_getter(request, post)
+
 
 @api_view(['GET'])
 def homeView (request):

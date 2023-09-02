@@ -2,11 +2,6 @@ from rest_framework import serializers
 from .models import Post,Photo,Comment,Like
 from accounts.models import CustomUser
 
-class postSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Post
-        fields = "__all__"
-        # depth = 1
 
 class photoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,6 +12,14 @@ class coment_Detail_userSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ('username','profile_pic')
+
+class postSerializer(serializers.ModelSerializer):
+    Auther_id = coment_Detail_userSerializer()
+    class Meta:
+        model = Post
+        fields = "__all__"
+        # depth = 1
+
 class commentSerializer(serializers.ModelSerializer):
     user_id = coment_Detail_userSerializer()
     class Meta:

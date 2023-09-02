@@ -7,7 +7,7 @@ from rest_framework.generics import (
 )
 from .models import blog,Follower,Categories,Category_associate
 from .permissions import IsOwnerOrReadOnly
-from .serializers import blogSerializer,followerSerializer,CategoriesSerializer,Category_associateSerializer
+from .serializers import blogSerializer,followerSerializer,CategoriesSerializer,Category_associateSerializer,blogSerializer_for_create
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -18,6 +18,8 @@ from rest_framework.views import APIView
 from django.http import JsonResponse
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
+from rest_framework.renderers import JSONRenderer
+from rest_framework.parsers import JSONParser
 
 @api_view(['GET'])
 def blogList(request):
@@ -101,23 +103,35 @@ def searchView(request):
             blogs_lsit.append(blogs_data)
         return Response(matching(blogs_lsit,blog_title))
 
-class CreateBlog(APIView):
-    parser_classes = (MultiPartParser, FormParser)
-    def post(self, request, *args, **kwargs):
-        serializer = blogSerializer(data=request.data)
-        category = request.data['category']
-        if serializer.is_valid():
-            serializer.save(owner=request.user)
-            created_blog = serializer.instance  # Get the created blog instance
-            created_blog_id = created_blog.id
-            print(type(created_blog_id))
-            data = {'category_name': category, 'blog_id': created_blog_id}
-            print(data)
-            s = Category_associateSerializer(data=data)
-            if s.is_valid():
-                s.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['POST'])
+def CreateBlog(request):
+    query_dict_dict = {}
+    for key, values in request.data.lists():
+        if len(values) == 1:
+            query_dict_dict[key] = values[0]
+        else:
+            query_dict_dict[key] = values
+    category = query_dict_dict.pop('category_name')
+    blog_instanc = blogSerializer_for_create(data=query_dict_dict)
+    if blog_instanc.is_valid():
+        current_blog = blog_instanc.save()
+    else:
+        errors = blog_instanc.errors
+        print(errors)
+    if type(category) != list:
+        category = [category]
+    for cat  in category:
+        category_to_ser = {'category_name': cat ,'blog_id':f'{current_blog.id}'}
+        cat_instance = Category_associateSerializer (data = category_to_ser )
+        if cat_instance.is_valid():
+            cat_instance.save()
+        else:
+            errors = cat_instance.errors
+    ser_query_dict_dict = blog.objects.filter(id= f'{current_blog.id}')
+    blog_instanc = blogSerializer_for_create(ser_query_dict_dict[0]).data
+    post_cats = get_associates(current_blog.id)
+    blog_instanc['categories'] = post_cats
+    return Response (blog_instanc)
 
 class BlogUpdateView(RetrieveUpdateDestroyAPIView):
     queryset = blog.objects.all()
@@ -171,3 +185,11 @@ def blog_getter(request, blogs):
             blog_data['Category_associates'] = []
         blog_list.append(blog_data)
     return Response(blog_list)
+
+def get_associates(id):
+    all_cats = Category_associate.objects.filter(blog_id = id)
+    cat_ser_list = []
+    for cat in all_cats:
+        cat_ser=Category_associateSerializer(cat).data
+        cat_ser_list.append(cat_ser)
+    return cat_ser_list

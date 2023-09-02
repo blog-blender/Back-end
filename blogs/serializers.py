@@ -27,6 +27,11 @@ class blogSerializer(serializers.ModelSerializer):
         fields = "__all__"
         # read_only_fields = ('title')
 
+class blogSerializer_for_create(serializers.ModelSerializer):
+    class Meta:
+        model = blog
+        fields = "__all__"
+        # read_only_fields = ('title')
 
 class CategoriesSerializer(serializers.ModelSerializer):
     class Meta:

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Post,Photo,Comment,Like
+from .models import Post,Photo,Comment,Like,test
 from accounts.models import CustomUser
 
 class postSerializer(serializers.ModelSerializer):
@@ -57,3 +57,8 @@ class postDetail_CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('user_id', 'content')
+
+class testSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = test
+        fields = "__all__"

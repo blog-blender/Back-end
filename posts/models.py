@@ -31,3 +31,6 @@ class Photo(models.Model):
     post_id = models.ForeignKey(Post, on_delete=models.CASCADE, null=True, blank=True)
     data=models.ImageField(upload_to='post_picture/', blank=True, null=True)
 
+
+class test(models.Model):
+    photo_data = models.ImageField(upload_to='post_picture/')

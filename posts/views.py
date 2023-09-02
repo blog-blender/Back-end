@@ -9,10 +9,8 @@ from rest_framework import status
 from .models import Post, Photo,Comment
 from .serializers import postSerializer, photoSerializer,commentSerializer,CommentSerializer,PostUpdateSerializer,postDetail_CommentSerializer,postDetail_LikeSerializer
 from .models import Post, Photo,Comment,Like
-from .serializers import postSerializer, photoSerializer,commentSerializer,LikeSerializer
 from blogs.models import Follower
 from rest_framework.decorators import api_view
-from rest_framework.parsers import MultiPartParser, FormParser
 
 ################################### GET methods ######################################
 
@@ -47,25 +45,32 @@ def homeView (request):
         return post_getter(request, post)
 
 
-################################### PUT methods ######################################
+################################### post methods ######################################
 
-class CreatePost(APIView):
-    parser_classes = (MultiPartParser, FormParser)
-    def post(self, request, *args, **kwargs):
-        serializer = postSerializer(data=request.data)
-        photos = request.data.get('photos', [])
-        if serializer.is_valid():
-            post_instance = serializer.save()
-            created_post_id = post_instance.id
-            photo_data_list = [{'post_id': created_post_id, 'data': photo} for photo in photos]
-            photo_serializer = photoSerializer(data=photo_data_list, many=True)
-            if photo_serializer.is_valid():
-                photo_serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
+@api_view(['POST'])
+def CreatePost(request):
+    query_dict_dict = {}
+    for key, values in request.data.lists():
+        if len(values) == 1:
+            query_dict_dict[key] = values[0]
+        else:
+            query_dict_dict[key] = values
+    instanc = postSerializer(data = query_dict_dict )
+    if instanc.is_valid():
+        current_post = instanc.save()
+    else:
+        errors = instanc.errors
+    photos_object = query_dict_dict.pop('photos')
+    for photo in photos_object:
+        photo_to_ser = {'data': photo ,'post_id':f'{current_post.id}'}
+        photo_instance = photoSerializer (data = photo_to_ser )
+        if photo_instance.is_valid():
+            photo_instance.save()
+        else:
+            errors = instanc.errors
+    pj = get_images(current_post.id)
+    query_dict_dict['photos'] = pj
+    return Response (query_dict_dict)
 
 class commentListView(ListCreateAPIView):
     serializer_class = commentSerializer
@@ -77,9 +82,6 @@ class commentListView(ListCreateAPIView):
             queryset = Comment.objects.all()
         return queryset
 
-
-
-
 class CommentUpdateView(RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
@@ -89,21 +91,6 @@ class PostUpdateView(RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostUpdateSerializer
     lookup_url_kwarg = 'post_id'
-
-
-
-
-# {
-#   "post_data": {
-#     "title": "Sample Post Title",
-#     "Auther_id": 1,  // Replace with a valid user ID
-#     "content": "This is the content of the sample post.",
-#     "blog_id": 1     // Replace with a valid blog ID
-#   },
-#   "photo_data": {
-#     "data": "base64_encoded_image_data_here"
-#   }
-# }
 
 ################################################## services ############################################
 def post_getter(request, post):
@@ -156,27 +143,6 @@ def get_queryset(request):
             return posts[:int(num_of_posts)]
         return posts
 
-# class PostCreateView(APIView):
-#     def post(self, request, format=None):
-#         post_data = request.data.get('post_data')
-#         photo_data = request.data.get('photo_data')
-#         post_serializer = postSerializer(data=post_data)
-#         photo_serializer = photoSerializer(data=photo_data)
-#         if post_serializer.is_valid() and photo_serializer.is_valid():
-#             post_serializer.save()
-#             photo_serializer.save()
-#             return Response(
-#                 {
-#                     'post': post_serializer.data,
-#                     'photo': photo_serializer.data
-#                 },
-#                 status=status.HTTP_201_CREATED
-#             )
-#         return Response(
-#             {
-#                 'post_errors': post_serializer.errors if post_data else None,
-#                 'photo_errors': photo_serializer.errors if photo_data else None
-#             },
-#             status=status.HTTP_400_BAD_REQUEST
-#         )
-
+def get_images(id):
+    image = Photo.objects.filter(post_id = id)
+    return photoSerializer(instance=image, many=True).data

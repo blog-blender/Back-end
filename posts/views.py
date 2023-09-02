@@ -1,6 +1,7 @@
 from rest_framework.generics import (
-    ListCreateAPIView,
+    CreateAPIView,
     RetrieveUpdateDestroyAPIView,
+    ListAPIView
 )
 from django.views import View
 from rest_framework.views import APIView
@@ -48,6 +49,15 @@ def homeView (request):
         post = get_queryset(request)
         return post_getter(request, post)
 
+class commentListView(ListAPIView):
+    serializer_class = commentSerializer
+    def get_queryset(self):
+        post_id = self.request.query_params.get('post_id')
+        if post_id:
+            queryset = Comment.objects.filter(post_id=post_id)
+        else:
+            queryset = Comment.objects.all()
+        return queryset
 
 ################################### post methods ######################################
 
@@ -76,15 +86,15 @@ def CreatePost(request):
     query_dict_dict['photos'] = pj
     return Response (query_dict_dict)
 
-class commentListView(ListCreateAPIView):
-    serializer_class = commentSerializer
-    def get_queryset(self):
-        post_id = self.request.query_params.get('post_id')
-        if post_id:
-            queryset = Comment.objects.filter(post_id=post_id)
-        else:
-            queryset = Comment.objects.all()
-        return queryset
+class commentCreateView(CreateAPIView):
+    serializer_class = CommentSerializer
+    # def get_queryset(self):
+    #     post_id = self.request.query_params.get('post_id')
+    #     if post_id:
+    #         queryset = Comment.objects.filter(post_id=post_id)
+    #     else:
+    #         queryset = Comment.objects.all()
+    #     return queryset
 
 class CommentUpdateView(RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()

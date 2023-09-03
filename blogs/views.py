@@ -7,7 +7,7 @@ from rest_framework.generics import (
 )
 from .models import blog,Follower,Categories,Category_associate
 from .permissions import IsOwnerOrReadOnly
-from .serializers import blogSerializer,followerSerializer,CategoriesSerializer,Category_associateSerializer,blogSerializer_for_create
+from .serializers import blogSerializer,followerSerializer,CategoriesSerializer,Category_associateSerializer,blogSerializer_for_create,Category_associateSerializer_for_search
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import difflib
@@ -48,6 +48,11 @@ class BlogFollowersView(ListAPIView):
                 queryset = Follower.objects.all()
             return queryset
 
+#########################################################################################
+
+
+
+
 @api_view(['GET'])
 def searchView(request):
     if request.method == 'GET':
@@ -56,48 +61,48 @@ def searchView(request):
         if catigory and blog_title:
             blogs = Category_associate.objects.filter(category_name=catigory)
             blogs_lsit=[]
+            res_list = []
             for b in blogs:
-                blogs_data = Category_associateSerializer(b, context={'request': request}).data
+                blogs_data = Category_associateSerializer_for_search(b, context={'request': request}).data
                 blogs_lsit.append(blogs_data)
-        blogs = blog.objects.all()
-        def matching(blogs_list, blog_title):
-            best_ratio = 0.65
-            best_response = []
-            if blog_title and catigory :
-                for i in blogs_list:
-                    ratio = difflib.SequenceMatcher(None, i["catigory"]["title"], blog_title).ratio()
-                    if ratio > best_ratio:
-                        best_ratio = ratio
-                        best_response.append(i)
-            if blog_title :
-                for i in blogs_list:
-                    ratio = difflib.SequenceMatcher(None, i["title"], blog_title).ratio()
-                    if ratio > best_ratio:
-                        best_ratio = ratio
-                        best_response.append(i)
-            elif catigory :
-                    for i in blogs_list:
-                        ratio = difflib.SequenceMatcher(None, i["catigory"], blog_title).ratio()
-                        if ratio > best_ratio:
-                            best_ratio = ratio
-                            best_response.append(i)
-            if best_ratio > 0.65:
-                return best_response
-            else:
-                return blogs_list
+                #
+                res_list = matching(blogs_lsit,blog_title)
+
+            ###
+            if res_list:
+                return Response(res_list)
+            else :
+
+
+                blogs = blog.objects.all()
+                all_blogs=[]
+                for b in blogs:
+                    blogs_data = blogSerializer(b, context={'request': request}).data
+                    all_blogs.append(blogs_data)
+                return Response(all_blogs)
+
+            ###
+
         if catigory:
             blogs = Category_associate.objects.filter(category_name=catigory)
             blogs_lsit=[]
             for b in blogs:
-                blogs_data = Category_associateSerializer(b, context={'request': request}).data
+                blogs_data = Category_associateSerializer_for_search(b, context={'request': request}).data
                 blogs_lsit.append(blogs_data)
             return Response(blogs_lsit)
+        blogs = blog.objects.all()
         blogs_lsit=[]
         for b in blogs:
             blogs_data = blogSerializer(b, context={'request': request}).data
             blogs_lsit.append(blogs_data)
-        return Response(matching(blogs_lsit,blog_title))
+        return Response(matching_title_only(blogs_lsit,blog_title))
 
+
+
+
+
+
+#########################################################################################
 @api_view(['POST'])
 def CreateBlog(request):
     query_dict_dict = {}
@@ -228,3 +233,33 @@ def get_associates(id):
         cat_ser=Category_associateSerializer(cat).data
         cat_ser_list.append(cat_ser)
     return cat_ser_list
+
+
+def matching(blogs_lsit,blog_title):
+    best_ratio = 0.65
+    best_response = []
+    for i in blogs_lsit:
+        ratio = difflib.SequenceMatcher(None, i["blog_id"]["title"], blog_title).ratio()
+        if ratio > best_ratio :
+            best_ratio = ratio
+            best_response.append(i)
+    if (best_ratio >= 0.65):
+
+        return best_response
+    else :
+        return blogs_lsit #if dont find return all blogs
+
+
+def matching_title_only(blogs_lsit,blog_title):
+    best_ratio = 0.65
+    best_response = []
+    for i in blogs_lsit:
+        ratio = difflib.SequenceMatcher(None, i["title"], blog_title).ratio()
+        if ratio > best_ratio :
+            best_ratio = ratio
+            best_response.append(i)
+    if (best_ratio >= 0.65):
+
+        return best_response
+    else :
+        return blogs_lsit #if dont find return all blogs

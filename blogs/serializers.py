@@ -57,3 +57,10 @@ class FollowCreateSerializer(serializers.Serializer):
 
 class UnfollowSerializer(serializers.Serializer):
     blog_id = serializers.IntegerField()
+
+
+class Category_associateSerializer_for_search(serializers.ModelSerializer):
+    class Meta:
+        model =Category_associate
+        fields = "__all__"
+        depth = 1

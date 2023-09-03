@@ -8,18 +8,13 @@ from rest_framework.generics import (
 from .models import blog,Follower,Categories,Category_associate
 from .permissions import IsOwnerOrReadOnly
 from .serializers import blogSerializer,followerSerializer,CategoriesSerializer,Category_associateSerializer,blogSerializer_for_create
-from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import difflib
 from rest_framework import status
-from .serializers import BlogUpdateSerializer,FollowCreateSerializer
+from .serializers import FollowCreateSerializer
 from rest_framework.views import APIView
-from django.http import JsonResponse
-from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
-from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
 
 @api_view(['GET'])
 def blogList(request):
@@ -133,11 +128,6 @@ def CreateBlog(request):
     blog_instanc['categories'] = post_cats
     return Response (blog_instanc)
 
-class BlogUpdateView(RetrieveUpdateDestroyAPIView):
-    queryset = blog.objects.all()
-    serializer_class = BlogUpdateSerializer
-    lookup_url_kwarg = 'blog_id'
-
 class FollowBlog(CreateAPIView):
     serializer_class = FollowCreateSerializer
 
@@ -155,6 +145,51 @@ class FollowBlog(CreateAPIView):
             return Response({'detail': 'You are already following this blog.'}, status=status.HTTP_400_BAD_REQUEST)
         Follower.objects.create(user_id=user, blog_id=blog_instance)
         return Response({'detail': 'You are now following this blog.'}, status=status.HTTP_201_CREATED)
+
+############################################### PUT ######################################
+
+@api_view(['PUT'])
+def UpdateBlog(request):
+    blog_id = request.query_params.get('blog_id')
+    if not blog_id:
+        return Response({'error': 'Missing blog_id parameter'}, status=400)
+    try:
+        current_blog = blog.objects.get(pk=blog_id)
+    except blog.DoesNotExist:
+        return Response({'error': 'Blog not found'}, status=404)
+    query_dict_dict = {}
+    for key, values in request.data.lists():
+        if len(values) == 1:
+            query_dict_dict[key] = values[0]
+        else:
+            query_dict_dict[key] = values
+    if not 'banner' in query_dict_dict:
+        query_dict_dict['banner'] = None
+    if not 'blog_pic' in query_dict_dict:
+        query_dict_dict['blog_pic'] = None
+    blog_serializer = blogSerializer_for_create(current_blog, data=query_dict_dict)
+    if blog_serializer.is_valid():
+        updated_blog = blog_serializer.save()
+    else:
+        return Response({'error': blog_serializer.errors}, status=400)
+    Category_associate.objects.filter(blog_id= f'{updated_blog.id}').delete()
+    category_names = query_dict_dict.pop('category_name', [])
+    if not isinstance(category_names, list):
+        category_names = [category_names]
+    for category_name in category_names:
+        category_to_ser = {'category_name': category_name, 'blog_id': f'{updated_blog.id}'}
+        cat_instance = Category_associateSerializer(data=category_to_ser)
+        if cat_instance.is_valid():
+            cat_instance.save()
+        else:
+            return Response({'error': cat_instance.errors}, status=400)
+    ser_query_dict_dict = blog.objects.filter(id=f'{updated_blog.id}')
+    updated_blog_instance = blogSerializer_for_create(ser_query_dict_dict[0]).data
+    post_cats = get_associates(updated_blog.id)
+    updated_blog_instance['categories'] = post_cats
+    return Response(updated_blog_instance)
+
+####################################### DELETE #############################################
 
 class UnfollowBlog(DestroyAPIView):
     # permission_classes = [permissions.IsAuthenticated]

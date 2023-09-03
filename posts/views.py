@@ -3,10 +3,7 @@ from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView,
     ListAPIView
 )
-from django.views import View
-from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
 from .models import Post, Photo,Comment
 from .serializers import postSerializer, photoSerializer,commentSerializer,CommentSerializer,PostUpdateSerializer,postDetail_CommentSerializer,postDetail_LikeSerializer
 from .models import Post, Photo,Comment,Like
@@ -88,17 +85,12 @@ def CreatePost(request):
 
 class commentCreateView(CreateAPIView):
     serializer_class = CommentSerializer
-    # def get_queryset(self):
-    #     post_id = self.request.query_params.get('post_id')
-    #     if post_id:
-    #         queryset = Comment.objects.filter(post_id=post_id)
-    #     else:
-    #         queryset = Comment.objects.all()
-    #     return queryset
-######################################################### put ########################
+
+####################################### put ########################
 
 @api_view(['PUT'])
-def UpdatePost(request, post_id):
+def UpdatePost(request):
+    post_id = request.query_params.get('post_id')
     try:
         current_post = Post.objects.get(pk=post_id)
     except Post.DoesNotExist:
@@ -136,29 +128,10 @@ def UpdatePost(request, post_id):
     query_dict_dict['photos'] = pj
     return Response(query_dict_dict)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class CommentUpdateView(RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     lookup_url_kwarg = 'comment_id'
-
-class PostUpdateView(RetrieveUpdateDestroyAPIView):
-    queryset = Post.objects.all()
-    serializer_class = PostUpdateSerializer
-    lookup_url_kwarg = 'post_id'
 
 ################################################## services ############################################
 def post_getter(request, post):

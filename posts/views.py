@@ -95,6 +95,60 @@ class commentCreateView(CreateAPIView):
     #     else:
     #         queryset = Comment.objects.all()
     #     return queryset
+######################################################### put ########################
+
+@api_view(['PUT'])
+def UpdatePost(request, post_id):
+    try:
+        current_post = Post.objects.get(pk=post_id)
+    except Post.DoesNotExist:
+        return Response({'error': 'Post not found'}, status=404)
+
+    query_dict_dict = {}
+    for key, values in request.data.lists():
+        if len(values) == 1:
+            query_dict_dict[key] = values[0]
+        else:
+            query_dict_dict[key] = values
+    post_serializer = PostUpdateSerializer(current_post, data=query_dict_dict)
+    if post_serializer.is_valid():
+        updated_post = post_serializer.save()
+    else:
+        return Response({'error': post_serializer.errors}, status=400)
+    Photo.objects.filter(post_id= f'{updated_post.id}').delete()
+    if 'photos' in query_dict_dict:
+        photos_object = query_dict_dict.pop('photos')
+        if not isinstance(photos_object, list):
+            photos_object = [photos_object]
+    else:
+        photos_object = []
+    if not isinstance(photos_object, list):
+        photos_object = [photos_object]
+    print(photos_object)
+    for photo in photos_object:
+        photo_to_ser = {'data': photo, 'post_id': f'{updated_post.id}'}
+        photo_instance = photoSerializer(data=photo_to_ser)
+        if photo_instance.is_valid():
+            photo_instance.save()
+        else:
+            return Response({'error': photo_instance.errors}, status=400)
+    pj = get_images(updated_post.id)
+    query_dict_dict['photos'] = pj
+    return Response(query_dict_dict)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class CommentUpdateView(RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()

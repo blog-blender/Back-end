@@ -111,31 +111,29 @@ def CreateBlog(request):
             query_dict_dict[key] = values[0]
         else:
             query_dict_dict[key] = values
-    category = query_dict_dict.pop('category_name')
-    blog_instanc = blogSerializer_for_create(data=query_dict_dict)
-    if blog_instanc.is_valid():
-        current_blog = blog_instanc.save()
+    category_names = query_dict_dict.pop('category_name', [])
+    if not isinstance(category_names, list):
+        category_names = [category_names]
+    blog_serializer = blogSerializer_for_create(data=query_dict_dict)
+    if blog_serializer.is_valid():
+        new_blog = blog_serializer.save()
     else:
-        errors = blog_instanc.errors
-        print(errors)
-    if type(category) != list:
-        category = [category]
-    for cat  in category:
-        category_to_ser = {'category_name': cat ,'blog_id':f'{current_blog.id}'}
-        cat_instance = Category_associateSerializer (data = category_to_ser )
+        return Response({'error': blog_serializer.errors}, status=400)
+    for category_name in category_names:
+        category_to_ser = {'category_name': category_name, 'blog_id': str(new_blog.id)}
+        cat_instance = Category_associateSerializer(data=category_to_ser)
         if cat_instance.is_valid():
             cat_instance.save()
         else:
-            errors = cat_instance.errors
-    ser_query_dict_dict = blog.objects.filter(id= f'{current_blog.id}')
-    blog_instanc = blogSerializer_for_create(ser_query_dict_dict[0]).data
-    post_cats = get_associates(current_blog.id)
-    blog_instanc['categories'] = post_cats
-    return Response (blog_instanc)
+            return Response({'error': cat_instance.errors}, status=400)
+    ser_query_dict_dict = blog.objects.filter(id=new_blog.id)
+    new_blog_instance = blogSerializer_for_create(ser_query_dict_dict[0]).data
+    post_cats = get_associates(new_blog.id)
+    new_blog_instance['categories'] = post_cats
+    return Response(new_blog_instance)
 
 class FollowBlog(CreateAPIView):
     serializer_class = FollowCreateSerializer
-
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -227,13 +225,12 @@ def blog_getter(request, blogs):
     return Response(blog_list)
 
 def get_associates(id):
-    all_cats = Category_associate.objects.filter(blog_id = id)
+    all_cats = Category_associate.objects.filter(blog_id=id)
     cat_ser_list = []
     for cat in all_cats:
-        cat_ser=Category_associateSerializer(cat).data
+        cat_ser = Category_associateSerializer(cat).data
         cat_ser_list.append(cat_ser)
     return cat_ser_list
-
 
 def matching(blogs_lsit,blog_title):
     best_ratio = 0.65

@@ -66,23 +66,29 @@ def CreatePost(request):
             query_dict_dict[key] = values[0]
         else:
             query_dict_dict[key] = values
+    if "photos" in query_dict_dict:
+        photos_object = query_dict_dict.pop('photos')
+    else:
+        photos_object = None
     instanc = postcreateSerializer(data = query_dict_dict )
     if instanc.is_valid():
         current_post = instanc.save()
     else:
         errors = instanc.errors
         return Response(errors, status=400)
-    photos_object = query_dict_dict.pop('photos')
-    for photo in photos_object:
-        photo_to_ser = {'data': photo ,'post_id':f'{current_post.id}'}
-        photo_instance = photoSerializer (data = photo_to_ser )
-        if photo_instance.is_valid():
-            photo_instance.save()
-        else:
-            errors = instanc.errors
-            return Response(errors, status=400)
-    pj = get_images(current_post.id)
-    query_dict_dict['photos'] = pj
+    if photos_object:
+        if not isinstance(photos_object, list):
+            photos_object = [photos_object]
+        for photo in photos_object:
+            photo_to_ser = {'data': photo ,'post_id':f'{current_post.id}'}
+            photo_instance = photoSerializer (data = photo_to_ser )
+            if photo_instance.is_valid():
+                photo_instance.save()
+            else:
+                errors = instanc.errors
+                return Response(errors, status=400)
+        pj = get_images(current_post.id)
+        query_dict_dict['photos'] = pj
     return Response (query_dict_dict)
 
 class commentCreateView(CreateAPIView):

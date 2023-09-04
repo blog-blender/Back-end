@@ -60,6 +60,7 @@ class UnfollowSerializer(serializers.Serializer):
 
 
 class Category_associateSerializer_for_search(serializers.ModelSerializer):
+    user_id = user_Serializer()
     class Meta:
         model =Category_associate
         fields = "__all__"

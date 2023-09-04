@@ -5,7 +5,7 @@ from rest_framework.generics import (
 )
 from rest_framework.response import Response
 from .models import Post, Photo,Comment
-from .serializers import postSerializer, photoSerializer,commentSerializer,CommentSerializer,PostUpdateSerializer,postDetail_CommentSerializer,postDetail_LikeSerializer
+from .serializers import postSerializer, photoSerializer,commentSerializer,CommentSerializer,PostUpdateSerializer,postDetail_CommentSerializer,postDetail_LikeSerializer,postcreateSerializer
 from .models import Post, Photo,Comment,Like
 from blogs.models import Follower
 from rest_framework.decorators import api_view
@@ -66,11 +66,12 @@ def CreatePost(request):
             query_dict_dict[key] = values[0]
         else:
             query_dict_dict[key] = values
-    instanc = postSerializer(data = query_dict_dict )
+    instanc = postcreateSerializer(data = query_dict_dict )
     if instanc.is_valid():
         current_post = instanc.save()
     else:
         errors = instanc.errors
+        return Response(errors, status=400)
     photos_object = query_dict_dict.pop('photos')
     for photo in photos_object:
         photo_to_ser = {'data': photo ,'post_id':f'{current_post.id}'}
@@ -79,6 +80,7 @@ def CreatePost(request):
             photo_instance.save()
         else:
             errors = instanc.errors
+            return Response(errors, status=400)
     pj = get_images(current_post.id)
     query_dict_dict['photos'] = pj
     return Response (query_dict_dict)

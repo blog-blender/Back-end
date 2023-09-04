@@ -60,3 +60,10 @@ class postDetail_CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('user_id', 'content','id')
+
+class postcreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = "__all__"
+        # depth = 1
+

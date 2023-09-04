@@ -7,7 +7,7 @@ from rest_framework.generics import (
 )
 from .models import blog,Follower,Categories,Category_associate
 from .permissions import IsOwnerOrReadOnly
-from .serializers import blogSerializer,followerSerializer,CategoriesSerializer,Category_associateSerializer,blogSerializer_for_create,Category_associateSerializer_for_search
+from .serializers import blogSerializer,followerSerializer,CategoriesSerializer,Category_associateSerializer,blogSerializer_for_create,Category_associateSerializer_for_search,FriendSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import difflib
@@ -15,6 +15,9 @@ from rest_framework import status
 from .serializers import FollowCreateSerializer
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import ValidationError
+from django.db.models import Q
+
 
 @api_view(['GET'])
 def blogList(request):
@@ -29,7 +32,6 @@ def blogList(request):
             blogs = blog.objects.all()
     return blog_getter(request, blogs)
 
-
 class BlogFollowersView(ListAPIView):
     serializer_class = followerSerializer
     def get_queryset(self):
@@ -40,25 +42,22 @@ class BlogFollowersView(ListAPIView):
                 queryset = Follower.objects.all()
             return queryset
 
-@api_view(['GET'])
-def friends(request):
-    if request.method == 'GET':
-        user_id = request.query_params.get('user_id')
+class Friends(ListAPIView):
+    serializer_class = FriendSerializer
+    def get_queryset(self):
+        user_id = self.request.query_params.get('user_id')
         if user_id:
             blogs = blog.objects.filter(owner=user_id)
         else:
-            return Response("inter valid user id in params", status= 400)
-    print(blogs[0].id)
-    for b in blogs:
-        queryset = Follower.objects.filter(blog_id=b.id)
-        print(queryset)
-    return blog_getter(request, blogs)
-
-
-#########################################################################################
-
-
-
+            raise ValidationError("Please provide a valid user_id in the query parameters", code=400)
+        merged_query = Q()
+        for b in blogs:
+            merged_query |= Q(blog_id=b.id)
+        queryset = Follower.objects.filter(merged_query)
+        if queryset.exists():
+            return queryset
+        else:
+            raise ValidationError("You don't have any followers", code=400)
 
 @api_view(['GET'])
 def searchView(request):
@@ -80,16 +79,13 @@ def searchView(request):
                 return Response(res_list)
             else :
 
-
                 blogs = blog.objects.all()
                 all_blogs=[]
                 for b in blogs:
                     blogs_data = blogSerializer(b, context={'request': request}).data
                     all_blogs.append(blogs_data)
                 return Response(all_blogs)
-
             ###
-
         if catigory:
             blogs = Category_associate.objects.filter(category_name=catigory)
             blogs_lsit=[]
@@ -104,12 +100,8 @@ def searchView(request):
             blogs_lsit.append(blogs_data)
         return Response(matching_title_only(blogs_lsit,blog_title))
 
+############################################ POST ########################################
 
-
-
-
-
-#########################################################################################
 @api_view(['POST'])
 def CreateBlog(request):
     query_dict_dict = {}
@@ -164,6 +156,7 @@ class followerList(ListCreateAPIView):
 class Category_list(ListCreateAPIView):
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
+
 
 ############################################### PUT ######################################
 

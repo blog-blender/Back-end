@@ -1,14 +1,17 @@
 from rest_framework.generics import (
     CreateAPIView,
     RetrieveUpdateDestroyAPIView,
-    ListAPIView
+    ListAPIView,
+    DestroyAPIView
 )
 from rest_framework.response import Response
 from .models import Post, Photo,Comment
-from .serializers import postSerializer, photoSerializer,commentSerializer,CommentSerializer,PostUpdateSerializer,postDetail_CommentSerializer,postDetail_LikeSerializer,postcreateSerializer
+from .serializers import postSerializer, photoSerializer,commentSerializer,CommentSerializer,PostUpdateSerializer,postDetail_CommentSerializer,postDetail_LikeSerializer,postcreateSerializer,LikeSerializerforcraete
 from .models import Post, Photo,Comment,Like
 from blogs.models import Follower
 from rest_framework.decorators import api_view
+from accounts.models import CustomUser
+from rest_framework import status
 
 ################################### GET methods ######################################
 
@@ -94,6 +97,14 @@ def CreatePost(request):
 class commentCreateView(CreateAPIView):
     serializer_class = CommentSerializer
 
+class CreateLike(CreateAPIView):
+    serializer_class = LikeSerializerforcraete
+    def perform_create(self, serializer):
+        user_id_param = self.request.query_params.get('user_id')
+        post_id_param = self.request.query_params.get('post_id')
+        post_id = Post.objects.get(id=post_id_param)
+        user_id = CustomUser.objects.get(id=user_id_param)
+        serializer.save(user_id=user_id, post_id=post_id)
 ####################################### put ########################
 
 @api_view(['PUT'])
@@ -136,10 +147,18 @@ def UpdatePost(request):
     query_dict_dict['photos'] = pj
     return Response(query_dict_dict)
 
+
+################################################# DELETE #############################################
+
 class CommentUpdateView(RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     lookup_url_kwarg = 'comment_id'
+
+class DeleteLike(DestroyAPIView):
+    queryset = Like.objects.all()
+    serializer_class = LikeSerializerforcraete  # You can use the same serializer or adjust as needed
+    lookup_url_kwarg = 'like_id'
 
 ################################################## services ############################################
 def post_getter(request, post):

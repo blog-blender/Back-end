@@ -65,3 +65,15 @@ class Category_associateSerializer_for_search(serializers.ModelSerializer):
         model =Category_associate
         fields = "__all__"
         depth = 1
+
+class BlogforfreindSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = blog
+        fields = ( 'id' ,'title')
+
+class FriendSerializer(serializers.ModelSerializer):
+    blog_id = BlogforfreindSerializer()
+    user_id = user_Serializer()
+    class Meta:
+        model = Follower
+        fields = "__all__"

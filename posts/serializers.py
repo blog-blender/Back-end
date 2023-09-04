@@ -42,6 +42,11 @@ class PostUpdateSerializer(serializers.ModelSerializer):
         model = Post
         fields = ('content','Auther_id','title')
 
+class LikeSerializerforcraete(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = "__all__"
+
 ################################# post details costum serializers ##############
 class postDetail_userSerializer(serializers.ModelSerializer):
 

@@ -29,14 +29,6 @@ def blogList(request):
             blogs = blog.objects.all()
     return blog_getter(request, blogs)
 
-class followerList(ListCreateAPIView):
-    # permission_classes = (IsOwnerOrReadOnly,)
-    queryset = Follower.objects.all()
-    serializer_class = followerSerializer
-
-class Category_list(ListCreateAPIView):
-    queryset = Categories.objects.all()
-    serializer_class = CategoriesSerializer
 
 class BlogFollowersView(ListAPIView):
     serializer_class = followerSerializer
@@ -47,6 +39,21 @@ class BlogFollowersView(ListAPIView):
             else:
                 queryset = Follower.objects.all()
             return queryset
+
+@api_view(['GET'])
+def friends(request):
+    if request.method == 'GET':
+        user_id = request.query_params.get('user_id')
+        if user_id:
+            blogs = blog.objects.filter(owner=user_id)
+        else:
+            return Response("inter valid user id in params", status= 400)
+    print(blogs[0].id)
+    for b in blogs:
+        queryset = Follower.objects.filter(blog_id=b.id)
+        print(queryset)
+    return blog_getter(request, blogs)
+
 
 #########################################################################################
 
@@ -148,6 +155,15 @@ class FollowBlog(CreateAPIView):
             return Response({'detail': 'You are already following this blog.'}, status=status.HTTP_400_BAD_REQUEST)
         Follower.objects.create(user_id=user, blog_id=blog_instance)
         return Response({'detail': 'You are now following this blog.'}, status=status.HTTP_201_CREATED)
+
+class followerList(ListCreateAPIView):
+    # permission_classes = (IsOwnerOrReadOnly,)
+    queryset = Follower.objects.all()
+    serializer_class = followerSerializer
+
+class Category_list(ListCreateAPIView):
+    queryset = Categories.objects.all()
+    serializer_class = CategoriesSerializer
 
 ############################################### PUT ######################################
 

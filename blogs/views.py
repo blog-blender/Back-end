@@ -216,6 +216,11 @@ class UnfollowBlog(DestroyAPIView):
         return Response({'detail': 'You have unfollowed this blog.'}, status=status.HTTP_204_NO_CONTENT)
 
 
+class BlogDelete (RetrieveUpdateDestroyAPIView):
+    queryset = blog.objects.all()
+    serializer_class = blogSerializer
+    lookup_url_kwarg = 'blog_id'
+
 ########################## sevices ###########################
 def blog_getter(request, blogs):
     blog_list = []

@@ -157,8 +157,13 @@ class CommentUpdateView(RetrieveUpdateDestroyAPIView):
 
 class DeleteLike(DestroyAPIView):
     queryset = Like.objects.all()
-    serializer_class = LikeSerializerforcraete  # You can use the same serializer or adjust as needed
+    serializer_class = LikeSerializerforcraete
     lookup_url_kwarg = 'like_id'
+
+class Deletepost (RetrieveUpdateDestroyAPIView):
+    queryset = Post.objects.all()
+    serializer_class = postSerializer
+    lookup_url_kwarg = 'post_id'
 
 ################################################## services ############################################
 def post_getter(request, post):

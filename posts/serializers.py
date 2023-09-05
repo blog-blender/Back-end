@@ -11,7 +11,7 @@ class photoSerializer(serializers.ModelSerializer):
 class coment_Detail_userSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('username','profile_pic')
+        fields = ('username','profile_pic','last_name','first_name')
 
 class postSerializer(serializers.ModelSerializer):
     Auther_id = coment_Detail_userSerializer()

@@ -7,7 +7,7 @@ from rest_framework.generics import (
 )
 from .models import blog,Follower,Categories,Category_associate
 from .permissions import IsOwnerOrReadOnly
-from .serializers import blogSerializer,followerSerializer,CategoriesSerializer,Category_associateSerializer,blogSerializer_for_create,Category_associateSerializer_for_search,FriendSerializer
+from .serializers import blogSerializer,followerSerializer,CategoriesSerializer,Category_associateSerializer,blogSerializer_for_create,Category_associateSerializer_for_search,FriendSerializer,Follower_blog_details_Serializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import difflib
@@ -231,6 +231,15 @@ def blog_getter(request, blogs):
         else:
             blog_data['Category_associates'] = []
         blog_list.append(blog_data)
+        followers = Follower.objects.filter( blog_id= b.id)
+        if followers:
+            followers_list=[]
+            for f in followers:
+                followers_data = Follower_blog_details_Serializer(f, context={'request': request}).data
+                followers_list.append(followers_data)
+                blog_data['followers'] = followers_list
+        else:
+            blog_data['followers'] = []
     return Response(blog_list)
 
 def get_associates(id):

@@ -77,3 +77,10 @@ class FriendSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follower
         fields = "__all__"
+
+
+class Follower_blog_details_Serializer(serializers.ModelSerializer):
+    user_id = user_Serializer()
+    class Meta:
+        model = Follower
+        fields = "__all__"

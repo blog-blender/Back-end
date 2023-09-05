@@ -185,8 +185,8 @@ def post_getter(request, post):
         photo = Photo.objects.filter(post_id=p.id)
         if photo:
             photos_list = []
-            for p in photo:
-                photo_data=photoSerializer(p, context={'request': request}).data
+            for pho in photo:
+                photo_data=photoSerializer(pho, context={'request': request}).data
                 photos_list.append(photo_data)
             post_data['photo'] = photos_list
         else:

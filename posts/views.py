@@ -12,6 +12,7 @@ from blogs.models import Follower
 from rest_framework.decorators import api_view
 from accounts.models import CustomUser
 from rest_framework import status
+from rest_framework import permissions
 
 ################################### GET methods ######################################
 
@@ -159,6 +160,8 @@ class DeleteLike(DestroyAPIView):
     queryset = Like.objects.all()
     serializer_class = LikeSerializerforcraete
     lookup_url_kwarg = 'like_id'
+    permissions = permissions.AllowAny
+
 
 class Deletepost (RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()

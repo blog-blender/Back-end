@@ -68,15 +68,16 @@ def searchView(request):
             blogs = Category_associate.objects.filter(category_name=catigory)
             blogs_lsit=[]
             res_list = []
-            for b in blogs:
-                blogs_data = Category_associateSerializer_for_search(b, context={'request': request}).data
-                blogs_lsit.append(blogs_data)
-                #
-                res_list = matching(blogs_lsit,blog_title)
+            if blogs:
+                for b in blogs:
+                    blogs_data = Category_associateSerializer_for_search(b, context={'request': request}).data
+                    blogs_lsit.append(blogs_data)
+                    #
+                    res_list = matching(blogs_lsit,blog_title)
 
-            ###
-            if res_list:
-                return Response(res_list)
+                ###
+                if res_list:
+                    return Response(res_list)
             else :
 
                 blogs = blog.objects.all()
@@ -271,14 +272,15 @@ def matching(blogs_lsit,blog_title):
 
 
 def matching_title_only(blogs_lsit,blog_title):
-    best_ratio = 0.65
+    best_ratio = 0.1
     best_response = []
     for i in blogs_lsit:
         ratio = difflib.SequenceMatcher(None, i["title"], blog_title).ratio()
+        print(ratio)
         if ratio > best_ratio :
             best_ratio = ratio
             best_response.append(i)
-    if (best_ratio >= 0.65):
+    if (best_ratio > 0.1):
 
         return best_response
     else :

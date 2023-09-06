@@ -14,6 +14,7 @@ from accounts.models import CustomUser
 from rest_framework import status
 from rest_framework import permissions
 from django.db.models import Q
+import random
 
 ################################### GET methods ######################################
 
@@ -225,7 +226,7 @@ def get_queryset(request):
 
     # Use the combined filter to get a single QuerySet
     merged_query_set = Post.objects.filter(combined_filter)
-
+    merged_query_set = merged_query_set.order_by('?')
     if num_of_posts:
         return merged_query_set[:int(num_of_posts)]
 

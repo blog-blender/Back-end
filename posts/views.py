@@ -13,6 +13,7 @@ from rest_framework.decorators import api_view
 from accounts.models import CustomUser
 from rest_framework import status
 from rest_framework import permissions
+from django.db.models import Q
 
 ################################### GET methods ######################################
 
@@ -203,21 +204,37 @@ def post_getter(request, post):
         post_list.append(post_data)
     return Response(post_list)
 
+
+
 def get_queryset(request):
-        user_id = request.query_params.get('user_id')
-        num_of_posts = request.query_params.get('num_of_posts')
-        if user_id:
-            queryset = Follower.objects.filter(user_id=user_id)
-        else:
-            queryset = Follower.objects.all()
-        if not queryset:
-            return []
-        for blog in queryset:
-            id = blog.blog_id
-            posts = Post.objects.filter(blog_id=id)
-        if num_of_posts:
-            return posts[:int(num_of_posts)]
-        return posts
+    user_id = request.query_params.get('user_id')
+    num_of_posts = request.query_params.get('num_of_posts')
+
+    if user_id:
+        queryset = Follower.objects.filter(user_id=user_id)
+    else:
+        queryset = Follower.objects.all()
+
+    # Initialize an empty Q object to build the combined filter
+    combined_filter = Q()
+
+    for blog in queryset:
+        id = blog.blog_id
+        posts = Post.objects.filter(blog_id=id)
+        combined_filter |= Q(id__in=posts.values_list('id', flat=True))
+
+    # Use the combined filter to get a single QuerySet
+    merged_query_set = Post.objects.filter(combined_filter)
+
+    if num_of_posts:
+        return merged_query_set[:int(num_of_posts)]
+
+    return merged_query_set
+
+
+
+
+
 
 def get_images(id):
     image = Photo.objects.filter(post_id = id)

@@ -132,22 +132,48 @@ def CreateBlog(request):
     new_blog_instance['categories'] = post_cats
     return Response(new_blog_instance)
 
-class FollowBlog(CreateAPIView):
-    serializer_class = FollowCreateSerializer
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        blog_id = serializer.validated_data['blog_id']
-        blog_instance = None
+@api_view(['POST'])
+def follow_blog(request):
+    if request.method == 'POST':
+        blog_id = request.query_params.get('blog_id')
+        user = request.user
+
         try:
             blog_instance = blog.objects.get(pk=blog_id)
+            blog_to_ser = {'user_id': user.id, 'blog_id': str(blog_instance.id)}
         except blog.DoesNotExist:
             return Response({'detail': 'Blog not found.'}, status=status.HTTP_400_BAD_REQUEST)
-        user = self.request.user
-        if Follower.objects.filter(user_id=user, blog_id=blog_instance).exists():
+
+        if Follower.objects.filter(user_id=user.id, blog_id=blog_instance).exists():
             return Response({'detail': 'You are already following this blog.'}, status=status.HTTP_400_BAD_REQUEST)
-        Follower.objects.create(user_id=user, blog_id=blog_instance)
-        return Response({'detail': 'You are now following this blog.'}, status=status.HTTP_201_CREATED)
+
+        serializer = FollowCreateSerializer(data=blog_to_ser)
+        if serializer.is_valid():
+            serializer.save()  # Create a new Follower instance
+            return Response({'detail': 'You are now following this blog.'}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Return 405 Method Not Allowed for non-POST requests
+    return Response({'detail': 'Method not allowed.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+# class FollowBlog(CreateAPIView):
+#     serializer_class = FollowCreateSerializer
+#     def create(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         blog_id = serializer.validated_data['blog_id']
+#         blog_instance = None
+#         try:
+#             blog_instance = blog.objects.get(pk=blog_id)
+#         except blog.DoesNotExist:
+#             return Response({'detail': 'Blog not found.'}, status=status.HTTP_400_BAD_REQUEST)
+#         user = self.request.user
+#         if Follower.objects.filter(user_id=user, blog_id=blog_instance).exists():
+#             return Response({'detail': 'You are already following this blog.'}, status=status.HTTP_400_BAD_REQUEST)
+#         Follower.objects.create(user_id=user, blog_id=blog_instance)
+#         return Response({'detail': 'You are now following this blog.'}, status=status.HTTP_201_CREATED)
+
 
 class followerList(ListCreateAPIView):
     # permission_classes = (IsOwnerOrReadOnly,)

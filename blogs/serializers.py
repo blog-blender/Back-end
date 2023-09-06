@@ -52,8 +52,16 @@ class BlogUpdateSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-class FollowCreateSerializer(serializers.Serializer):
-    blog_id = serializers.IntegerField()
+
+class FollowCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Follower
+        fields = ['user_id', 'blog_id']
+
+    def create(self, validated_data):
+        user_id = validated_data['user_id']
+        blog_id = validated_data['blog_id']
+        return Follower.objects.create(user_id=user_id, blog_id=blog_id)
 
 class UnfollowSerializer(serializers.Serializer):
     blog_id = serializers.IntegerField()

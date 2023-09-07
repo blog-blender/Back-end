@@ -42,22 +42,32 @@ class BlogFollowersView(ListAPIView):
                 queryset = Follower.objects.all()
             return queryset
 
+from django.db.models import Q
+from django.core.exceptions import ValidationError
+from rest_framework.generics import ListAPIView
+
 class Friends(ListAPIView):
     serializer_class = FriendSerializer
+
     def get_queryset(self):
         user_id = self.request.query_params.get('user_id')
+
         if user_id:
             blogs = blog.objects.filter(owner=user_id)
         else:
             raise ValidationError("Please provide a valid user_id in the query parameters", code=400)
+
         merged_query = Q()
-        for b in blogs:
-            merged_query |= Q(blog_id=b.id)
-        queryset = Follower.objects.filter(merged_query)
+        for blog_instance in blogs:
+            merged_query |= Q(blog_id=blog_instance.id)
+
+        queryset = Follower.objects.filter(merged_query).distinct()  # Use distinct() to remove duplicates
+
         if queryset.exists():
             return queryset
         else:
             raise ValidationError("You don't have any followers", code=400)
+
 
 @api_view(['GET'])
 def searchView(request):

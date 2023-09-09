@@ -3,6 +3,6 @@ from django.db import models
 from cloudinary.models import CloudinaryField
 
 class CustomUser(AbstractUser):
-    profile_pic = CloudinaryField("image",overwrite=True,format="jpg",null=True, blank=True)
+    profile_pic = CloudinaryField("image",overwrite=True,format="jpg",default="https://wallpapers.com/images/hd/gaming-profile-pictures-pbhlm4b7w9u0lwle.jpg")
     user_banner_pic = CloudinaryField("image",overwrite=True,format="jpg",null=True, blank=True)
 

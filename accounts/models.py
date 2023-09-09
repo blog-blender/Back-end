@@ -5,5 +5,4 @@ from cloudinary.models import CloudinaryField
 class CustomUser(AbstractUser):
     profile_pic = CloudinaryField("image",overwrite=True,format="jpg",null=True, blank=True)
     user_banner_pic = CloudinaryField("image",overwrite=True,format="jpg",null=True, blank=True)
-    def __str__(self):
-        return self.username
+

@@ -15,11 +15,6 @@ from pathlib import Path
 import environ
 import cloudinary
 
-cloudinary.config(
-  cloud_name = os.environ.get('CLOUD_NAME'),
-  api_key = os.environ.get('CLOUD_API_KEY'),
-  api_secret = os.environ.get('CLOUD_API_SECRET')
-)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,9 +31,20 @@ env = environ.Env(
     DATABASE_PASSWORD=(str, ""),
     DATABASE_HOST=(str, ""),
     DATABASE_PORT=(int, 5432),
+    CLOUD_NAME=(str, ""),
+    CLOUD_API_KEY=(str, ""),
+    CLOUD_API_SECRET=(str, "")
 )
 
 environ.Env.read_env()
+
+cloudinary.config(
+  cloud_name = env.str("CLOUD_NAME"),
+  api_key =  env.str("CLOUD_API_KEY"),
+  api_secret = env.str("CLOUD_API_SECRET"),
+  secure = False
+)
+
 
 ENVIRONMENT = env.str("ENVIRONMENT")
 

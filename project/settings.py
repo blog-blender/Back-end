@@ -42,7 +42,7 @@ cloudinary.config(
   cloud_name = env.str("CLOUD_NAME"),
   api_key =  env.str("CLOUD_API_KEY"),
   api_secret = env.str("CLOUD_API_SECRET"),
-  secure = False
+#   secure = False
 )
 
 

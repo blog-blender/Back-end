@@ -49,7 +49,7 @@ def RecentPosts (request):
 @api_view(['GET'])
 def homeView (request):
     if request.method == 'GET':
-        post = get_queryset(request)
+        post = get_queryset_for_home(request)
         return post_getter(request, post)
 
 class commentListView(ListAPIView):
@@ -173,6 +173,10 @@ class Deletepost (RetrieveUpdateDestroyAPIView):
 ################################################## services ############################################
 def post_getter(request, post):
     post_list = []
+    print(type(post))
+    if type(post) == str :
+        print("ok1111111111111111111111111111111111")
+        return Response("you dont follow any blog")
     for p in post:
         post_data = postSerializer(p, context={'request': request}).data
         comments = Comment.objects.filter( post_id= p.id)
@@ -240,3 +244,33 @@ def get_queryset(request):
 def get_images(id):
     image = Photo.objects.filter(post_id = id)
     return photoSerializer(instance=image, many=True).data
+
+
+def get_queryset_for_home(request):
+    user_id = request.query_params.get('user_id')
+    num_of_posts = request.query_params.get('num_of_posts')
+
+    if user_id:
+        queryset = Follower.objects.filter(user_id=user_id)
+        if not queryset:
+            print(queryset)
+            return ("you dont follow any blog")
+    else:
+        queryset = Follower.objects.all()
+
+    # Initialize an empty Q object to build the combined filter
+    combined_filter = Q()
+
+    for blog in queryset:
+        id = blog.blog_id
+        posts = Post.objects.filter(blog_id=id)
+        combined_filter |= Q(id__in=posts.values_list('id', flat=True))
+
+    # Use the combined filter to get a single QuerySet
+    merged_query_set = Post.objects.filter(combined_filter)
+    merged_query_set = merged_query_set.order_by('?')
+    if num_of_posts:
+        return merged_query_set[:int(num_of_posts)]
+    print(type(merged_query_set))
+    return merged_query_set
+

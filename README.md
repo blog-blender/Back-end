@@ -209,11 +209,33 @@ In today's digital age, social media has become a central part of our lives. How
 
 - **Usability:** Our platform will prioritize user-friendly design, intuitive navigation, and responsive layout to ensure a seamless and enjoyable user experience. User feedback and usability testing will be conducted to continuously improve the platform's usability.
 
-## Installation and Usage
+## Setup
 
-1. Clone the repository.
-2. Install the required dependencies using `pip install`.
-3. Start the server using `python manage.py runserver`.
+Before you begin, ensure that Python 3.10 is installed on your system and that you are on the latest branch version which currently is: ```v2``` .
+
+ Follow these steps to set up and run the API:
+
+1. **Install Dependencies**: Open your terminal and run the following command to install all project dependencies using pip:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Apply model changes to database schema**
+
+    ```bash
+    python manage.py makemigrations
+    python manage.py migrate
+    ```
+
+3. **Start the API**: To start the API, use the following command:
+
+    ```bash
+    python manage.py runserver
+    ```
+
+    This will launch the API, and you can access it at the provided URL.
+
 
 ## Contributors
 

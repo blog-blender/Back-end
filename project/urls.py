@@ -36,6 +36,11 @@ urlpatterns = [
         jwt_views.TokenRefreshView.as_view(),
         name="token_refresh",
     ),
+    path(
+        "api/token/verify/",
+        jwt_views.TokenVerifyView.as_view(),
+        name="token_verify",
+    ),
     path("blogs/", include("blogs.urls_front")),
     path("", TemplateView.as_view(template_name="home.html"), name="home"),
     path("about/", TemplateView.as_view(template_name="about.html"), name="about"),

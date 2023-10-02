@@ -13,7 +13,7 @@ from rest_framework.decorators import api_view
 from accounts.models import CustomUser
 from rest_framework import status
 from rest_framework import permissions
-
+import random
 ################################### GET methods ######################################
 
 @api_view(['GET'])
@@ -206,6 +206,7 @@ def post_getter(request, post):
 def get_queryset(request):
         user_id = request.query_params.get('user_id')
         num_of_posts = request.query_params.get('num_of_posts')
+        posts=[]
         if user_id:
             queryset = Follower.objects.filter(user_id=user_id)
         else:
@@ -214,9 +215,10 @@ def get_queryset(request):
             return []
         for blog in queryset:
             id = blog.blog_id
-            posts = Post.objects.filter(blog_id=id)
+            posts += Post.objects.filter(blog_id=id)
         if num_of_posts:
-            return posts[:int(num_of_posts)]
+            return random.sample(posts, int(num_of_posts))
+        random.shuffle(posts)
         return posts
 
 def get_images(id):

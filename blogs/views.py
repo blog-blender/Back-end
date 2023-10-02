@@ -139,8 +139,10 @@ class FollowBlog(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         blog_id = serializer.validated_data['blog_id']
         blog_instance = None
+        blog.DoesNotExist
         try:
             blog_instance = blog.objects.get(pk=blog_id)
+            print(blog_instance,222222222)
         except blog.DoesNotExist:
             return Response({'detail': 'Blog not found.'}, status=status.HTTP_400_BAD_REQUEST)
         user = self.request.user
@@ -272,16 +274,15 @@ def matching(blogs_lsit,blog_title):
 
 
 def matching_title_only(blogs_lsit,blog_title):
-    best_ratio = 0.1
+    def extract_blog_object(obj):
+        target = obj[0]
+        return target
+
     best_response = []
     for i in blogs_lsit:
         ratio = difflib.SequenceMatcher(None, i["title"], blog_title).ratio()
-        print(ratio)
-        if ratio > best_ratio :
-            best_ratio = ratio
-            best_response.append(i)
-    if (best_ratio > 0.1):
-
-        return best_response
-    else :
-        return blogs_lsit #if dont find return all blogs
+        print(ratio, i["title"])
+        best_response.append((i,ratio))
+    best_response.sort(key=lambda obj: obj[1], reverse=True)
+    best_response = map(extract_blog_object,best_response)
+    return best_response

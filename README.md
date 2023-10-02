@@ -1,7 +1,7 @@
 # Blog Blender
 
 Social Media Platform Backend Server
-
+[deployed server](https://back-8zqrewq3a-blog-blender.vercel.app/api/v1/accounts/register)
 ## table of end points:
 | No. | Name                                    | Path                                                     | Input                                       | Output                            |
 | --- | --------------------------------------- | -------------------------------------------------------- | ------------------------------------------- | --------------------------------- |
